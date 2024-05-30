@@ -16,10 +16,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java version
-        uses: actions/setup-java@v1
-        with:
-          java-version: 'java21'
+      
+      - name: Download JDK 21
+        run: wget -q -O jdk-21-linux-x64.tar.gz https://static.azul.com/zulu/bin/zulu21.28.85-ca-fx-jdk21.0.0-linux_x64.tar.gz
+
+      - name: Extract JDK 21
+        run: |
+          mkdir $HOME/jdk-21
+          tar -xzf jdk-21-linux-x64.tar.gz -C $HOME/jdk-21 --strip-components=1
+
+      - name: Set up JDK 21
+        run: echo "$HOME/jdk-21/bin" >> $GITHUB_PATH
+        env:
+          JAVA_HOME: $HOME/jdk-21
+
+      - name: Verify Java Version
+        run: java -version
+
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
