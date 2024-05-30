@@ -1,0 +1,45 @@
+* {
+    font-family: sans-serif;
+}
+
+.vertical-nav {
+    min-width: 13rem;
+    width: 10rem;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-content {
+    width: calc(100% - 10rem);
+    margin-left: 10rem;
+}
+
+.table {
+    width: calc(100% - 10rem);
+    margin-left: 5em;
+}
+
+.nav-link {
+    color: black;
+}
+
+.nav-link:hover {
+    color: white;
+    background-color: #660000;
+}
+
+.nav-link:hover .bi{
+    color: white;
+}
+
+.nav-link .bi{
+    color: #660000;
+}
+
+.nav-link:focus {
+    color: black;
+}
+
