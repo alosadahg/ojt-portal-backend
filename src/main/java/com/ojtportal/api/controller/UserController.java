@@ -45,6 +45,11 @@ public class UserController {
         return userService.registerInstructor(newUser);
     }
 
+    @RequestMapping(method = RequestMethod.POST, path = "auth/register-chair")
+    public int registerChair(UserEntity newUser) {
+        return userService.registerChair(newUser);
+    }
+
     @RequestMapping(method = RequestMethod.POST, path = "auth/register-admin")
     public int registerAdmin(UserEntity newUser) {
         return userService.registerAdmin(newUser);
