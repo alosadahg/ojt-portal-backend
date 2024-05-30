@@ -50,7 +50,7 @@ public class TrainingPlanService {
         Supervisor supervisor = supervisorRepo.findByUser_Email(supervisorEmail);
         TrainingPlan plan = new TrainingPlan(trainingPlanDTO.getTitle(), trainingPlanDTO.getDescription(),
                 trainingPlanDTO.getStartDate(), trainingPlanDTO.getEndDate(), supervisor);
-        if (trainingPlanRepo.findByTitleAndSupervisor(trainingPlanDTO.getTitle(), supervisor)==null) {
+        if (trainingPlanRepo.findByTitleAndSupervisor(trainingPlanDTO.getTitle(), supervisor) == null) {
             if (trainingPlanDTO.getStartDate().isBefore(LocalDate.now())) {
                 return "ERROR: Training plan start date cannot be before today's date.";
             }
@@ -61,6 +61,56 @@ public class TrainingPlanService {
             return "ERROR: Training plan end date must be after the start date";
         }
         return "ERROR: There is an existing training plan with that title";
+    }
+
+    public String updateTrainingPlan(TrainingPlanDTO trainingPlanDTO, String supervisorEmail) {
+        TrainingPlan existing = trainingPlanRepo.findById(trainingPlanDTO.getPlan_id()).get();
+        if (existing != null) {
+            if (existing.getSupervisor().getUser().getEmail().equals(supervisorEmail)) {
+                boolean dateIsChanged = false;
+                if (trainingPlanDTO.getStartDate().isBefore(LocalDate.now())) {
+                    return "ERROR: Training plan start date cannot be before today's date.";
+                }
+                if (existing.getStartDate().equals(trainingPlanDTO.getStartDate())) {
+                    dateIsChanged = true;
+                }
+                existing.setStartDate(trainingPlanDTO.getStartDate());
+                if (trainingPlanDTO.getEndDate().isBefore(trainingPlanDTO.getStartDate())) {
+                    return "ERROR: Training plan end date must be after the start date";
+                }
+                if (existing.getEndDate().equals(trainingPlanDTO.getEndDate())) {
+                    dateIsChanged = true;
+                }
+                existing.setEndDate(trainingPlanDTO.getEndDate());
+                existing.setDescription(trainingPlanDTO.getDescription());
+                List<TrainingPlan> plans = trainingPlanRepo.findBySupervisor_User_Email(supervisorEmail);
+                boolean noCopies = true;
+                for (TrainingPlan plan : plans) {
+                    if (!plan.equals(existing)) {
+                        if (plan.getTitle().equals(trainingPlanDTO.getTitle())) {
+                            return "ERROR: There is an existing training plan with the same title.";
+                        }
+                    }
+                }
+                if (noCopies)
+                    existing.setTitle(trainingPlanDTO.getTitle());
+
+                trainingPlanRepo.save(existing);
+                if (dateIsChanged) {
+                    existing = trainingPlanRepo.findById(existing.getTrainingplanid()).get();
+                    List<StudentTrainingPlan> studentTrainingPlans = studentTrainingPlanRepo
+                            .findByTrainingPlan(existing);
+                    List<String> studentEmails = new ArrayList<>();
+                    for (StudentTrainingPlan studentTrainingPlan : studentTrainingPlans) {
+                        studentEmails.add(studentTrainingPlan.getStudent().getUser().getEmail());
+                    }
+                    sendTrainingPlanUpdateNotification(studentEmails, existing.getSupervisor(), existing);
+                }
+                return existing.toString();
+            }
+            return "ERROR: Record of training plan ID: " + trainingPlanDTO.getPlan_id() + " is inaccessible.";
+        }
+        return "ERROR: Record for training plan ID: " + trainingPlanDTO.getPlan_id() + " not found.";
     }
 
     public String assignTrainingPlan(AssignTrainingPlanDTO assignTrainingPlan, String supervisorEmail) {
@@ -76,15 +126,16 @@ public class TrainingPlanService {
         List<String> invalidEmails = new ArrayList<>();
         List<String> alreadyAssignedEmails = new ArrayList<>();
         List<String> assignedInternEmails = new ArrayList<>();
-    
+
         for (String studentEmail : assignTrainingPlan.getInternEmails()) {
             OjtRecord record = ojtRecordRepo.findByStudent_User_Email(studentEmail);
             if (record == null || !record.getSupervisor().equals(supervisor)) {
                 invalidEmails.add(studentEmail);
                 continue;
             }
-            StudentTrainingPlan studentTrainingPlan = studentTrainingPlanRepo.findByStudentAndTrainingPlan(record.getStudent(), plan);
-            if(studentTrainingPlan == null) {
+            StudentTrainingPlan studentTrainingPlan = studentTrainingPlanRepo
+                    .findByStudentAndTrainingPlan(record.getStudent(), plan);
+            if (studentTrainingPlan == null) {
                 StudentTrainingPlan trainingPlan = new StudentTrainingPlan(record.getStudent(), plan);
                 studentTrainingPlanRepo.save(trainingPlan);
             } else {
@@ -93,7 +144,7 @@ public class TrainingPlanService {
             }
             List<Task> tasks = plan.getTasks();
             for (Task task : tasks) {
-                if(studentTaskRepo.findByStudentAndTask(record.getStudent(), task)==null) {
+                if (studentTaskRepo.findByStudentAndTask(record.getStudent(), task) == null) {
                     StudentTask newStudentTask = new StudentTask(record.getStudent(), task);
                     studentTaskRepo.save(newStudentTask);
                 }
@@ -105,15 +156,37 @@ public class TrainingPlanService {
             returnMessage.append("Successfully assigned " + plan.getTitle() + " to: " + assignedInternEmails + "\n");
             sendAssignmentEmails(assignedInternEmails, supervisor, plan);
         }
-        if(!alreadyAssignedEmails.isEmpty()) {
-            returnMessage.append("NOTICE: These interns have already been assigned with the training plan " + alreadyAssignedEmails + "\n");
+        if (!alreadyAssignedEmails.isEmpty()) {
+            returnMessage.append("NOTICE: These interns have already been assigned with the training plan "
+                    + alreadyAssignedEmails + "\n");
         }
         if (!invalidEmails.isEmpty()) {
-            returnMessage.append("ERROR: No ojt records found from these emails " + invalidEmails + "\n"); 
+            returnMessage.append("ERROR: No ojt records found from these emails " + invalidEmails + "\n");
         }
         return returnMessage.toString();
     }
-    
+
+    private void sendTrainingPlanUpdateNotification(List<String> assignedInternEmails, Supervisor supervisor,
+            TrainingPlan plan) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy");
+        String messageTemplate = "Training Plan Duration is updated! ⏰ \n\n%s %s has updated a training plan assigned to you.\n\n"
+                +
+                "Training Plan: %s\nDescription: %s\nStart Date: %s\nEnd Date: %s\nNumber of Tasks: %d";
+
+        String message = String.format(messageTemplate,
+                supervisor.getUser().getFirstname(),
+                supervisor.getUser().getLastname(),
+                plan.getTitle(),
+                plan.getDescription(),
+                plan.getStartDate().format(formatter),
+                plan.getEndDate().format(formatter),
+                plan.getTotalTasks());
+
+        for (String email : assignedInternEmails) {
+            emailService.sendSimpleMail(email, "Modified Training Plan", message);
+        }
+    }
+
     private void sendAssignmentEmails(List<String> assignedInternEmails, Supervisor supervisor, TrainingPlan plan) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy");
         String messageTemplate = "Ding Dong! 🔔 \n\n%s %s has assigned you with a training plan.\n\n" +
@@ -165,15 +238,18 @@ public class TrainingPlanService {
     }
 
     public List<TrainingPlan> getTrainingPlansByStudent(String studentEmail, String user_type, String auth) {
-        if(studentEmail.equals("all") && user_type.equals("admin")) {
-            return trainingPlanRepo.findAll();
-        }
-        if(user_type.equals("supervisor")) {
-            if(studentEmail.equals("all"))
+        if (user_type.equals("supervisor")) {
+            if (studentEmail.equalsIgnoreCase("all"))
                 return trainingPlanRepo.findBySupervisor_User_Email(auth);
             else
-                return trainingPlanRepo.findBySupervisor_User_EmailAndStudentTrainingPlans_Student_User_Email(auth, studentEmail);
-        } 
+                return trainingPlanRepo.findBySupervisor_User_EmailAndStudentTrainingPlans_Student_User_Email(auth,
+                        studentEmail);
+        }
+        if (!user_type.equals("student")) {
+            if (studentEmail.equalsIgnoreCase("all")) {
+                return trainingPlanRepo.findAll();
+            }
+        }
         return trainingPlanRepo.findByStudentTrainingPlans_Student_User_Email(studentEmail);
     }
 }

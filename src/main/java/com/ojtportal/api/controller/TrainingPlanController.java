@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,32 +33,42 @@ public class TrainingPlanController {
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
     @GetMapping("/get-training-plans")
     public ResponseEntity<List<TrainingPlan>> getAllTrainingPlansByStudent(@RequestParam String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
-        String email = principal.getEmail();
         String user_type = "student";
         String auth = "";
         for (GrantedAuthority authority : principal.getAuthorities()) {
-            if (authority.getAuthority().equals("ROLE_ADMIN")) {
-                email = studentEmail;
-                user_type = "admin";
-            } 
-            if (authority.getAuthority().equals("ROLE_SUPERVISOR")) {
-                email = studentEmail;
-                user_type = "supervisor";
-                auth = principal.getEmail();
-            } 
+            switch (authority.getAuthority()) {
+                case "ROLE_SUPERVISOR":
+                    auth = principal.getEmail();
+                    user_type = authority.getAuthority().substring(5).toLowerCase();
+                    break;
+                case "ROLE_STUDENT":
+                    studentEmail = principal.getEmail();
+                    break;
+                case "ROLE_ACTIVE":
+                    break;
+                default:
+                    user_type = authority.getAuthority().substring(5).toLowerCase();
+                    break;
+            }
         }
-        return ResponseEntity.ok(trainingPlanService.getTrainingPlansByStudent(email, user_type, auth));
+        return ResponseEntity.ok(trainingPlanService.getTrainingPlansByStudent(studentEmail, user_type, auth));
     }
 
     @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("/supervisor/assign-training-plan")
-    public String assignTrainingPlan(@RequestBody AssignTrainingPlanDTO assignTrainingPlan, @AuthenticationPrincipal UserPrincipal principal) {
-        return trainingPlanService.assignTrainingPlan(assignTrainingPlan, principal.getEmail());
+    public ResponseEntity<String> assignTrainingPlan(@RequestBody AssignTrainingPlanDTO assignTrainingPlan, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(trainingPlanService.assignTrainingPlan(assignTrainingPlan, principal.getEmail()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("/supervisor/add-training-plan")
-    public String addTrainingPlan(TrainingPlanDTO plan,  @AuthenticationPrincipal UserPrincipal principal) {
-        return trainingPlanService.addTrainingPlan(plan, principal.getEmail());
+    public ResponseEntity<String> addTrainingPlan(TrainingPlanDTO plan,  @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(trainingPlanService.addTrainingPlan(plan, principal.getEmail()));
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
+    @PutMapping("/supervisor/update-training-plan")
+    public ResponseEntity<String> updateTrainingPlan (TrainingPlanDTO plan, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(trainingPlanService.updateTrainingPlan(plan, principal.getEmail()));
     }
 }
