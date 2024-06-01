@@ -1,6 +1,7 @@
 package com.ojtportal.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,8 +20,8 @@ public class SupervisorController {
     private SupervisorService supervisorService;
 
     @PostMapping("/supervisor/register")
-    public int addSupervisor(SupervisorDTO supervisorDTO) {
+    public ResponseEntity<Integer> addSupervisor(SupervisorDTO supervisorDTO) {
         UserEntity user = new UserEntity(supervisorDTO.getEmail(), supervisorDTO.getPassword(), supervisorDTO.getFirstname(), supervisorDTO.getLastname());
-        return supervisorService.registerSupervisor(user, supervisorDTO.getCompany_name(), supervisorDTO.getCompany_email(), supervisorDTO.getCompany_contactNo(), supervisorDTO.getCompany_location(), supervisorDTO.getPosition());
+        return ResponseEntity.ok(supervisorService.registerSupervisor(user, supervisorDTO.getCompany_name(), supervisorDTO.getCompany_email(), supervisorDTO.getCompany_contactNo(), supervisorDTO.getCompany_location(), supervisorDTO.getPosition()));
     }
 }

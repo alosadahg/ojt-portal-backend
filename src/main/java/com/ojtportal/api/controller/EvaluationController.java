@@ -1,5 +1,6 @@
 package com.ojtportal.api.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,19 +20,19 @@ public class EvaluationController {
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE') and hasAuthority('ROLE_STUDENT')")
     @PostMapping("/student/give-ojt-feedback")
-    public int addStudentFeedback(String feedback, @AuthenticationPrincipal UserPrincipal principal) {
-        return evaluationService.addStudentFeedback(feedback, principal.getEmail());
+    public ResponseEntity<Integer> addStudentFeedback(String feedback, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(evaluationService.addStudentFeedback(feedback, principal.getEmail()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("/supervisor/evaluate-intern")
-    public String addSupervisorFeedback(double grade, String feedback, String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
-        return evaluationService.addSupervisorFeedback(feedback, grade, studentEmail, principal.getEmail());
+    public ResponseEntity<String> addSupervisorFeedback(double grade, String feedback, String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(evaluationService.addSupervisorFeedback(feedback, grade, studentEmail, principal.getEmail()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_INSTRUCTOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("/instructor/evaluate-intern")
-    public String addInstructorFeedback(double grade, String feedback, String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
-        return evaluationService.addInstructorFeedback(feedback, grade, studentEmail);
+    public ResponseEntity<String> addInstructorFeedback(double grade, String feedback, String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(evaluationService.addInstructorFeedback(feedback, grade, studentEmail));
     }
 }

@@ -80,14 +80,13 @@ public class CompanyService {
     }
 
     public List<Company> getAllCompanies(String email, String user_type) {
-        if(email.isBlank() || email.isEmpty()) {
-            return companyRepo.findAll();
-        }
         OjtRecord record = null;
         if(user_type.equals("STUDENT")) {
             record = ojtRecordRepo.findByStudent_User_Email(email);
         } else if(user_type.equals("SUPERVISOR")) {
             record = ojtRecordRepo.findBySupervisor_User_Email(email).get(0);
+        } else {
+            return companyRepo.findAll();
         }
         return List.of(record.getCompany());
     }

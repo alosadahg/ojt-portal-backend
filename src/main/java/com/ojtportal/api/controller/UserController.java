@@ -24,8 +24,8 @@ public class UserController {
 
     @GetMapping("user/get/all")
     @PreAuthorize("hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_ACTIVE')")
-    public List<UserEntity> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserEntity>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("user/get")
@@ -41,18 +41,18 @@ public class UserController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "auth/register-instructor")
-    public int registerInstructor(UserEntity newUser) {
-        return userService.registerInstructor(newUser);
+    public ResponseEntity<Integer> registerInstructor(UserEntity newUser) {
+        return ResponseEntity.ok(userService.registerInstructor(newUser));
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "auth/register-chair")
-    public int registerChair(UserEntity newUser) {
-        return userService.registerChair(newUser);
+    public ResponseEntity<Integer> registerChair(UserEntity newUser) {
+        return ResponseEntity.ok(userService.registerChair(newUser));
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "auth/register-admin")
-    public int registerAdmin(UserEntity newUser) {
-        return userService.registerAdmin(newUser);
+    public ResponseEntity<Integer> registerAdmin(UserEntity newUser) {
+        return ResponseEntity.ok(userService.registerAdmin(newUser));
     }
     
     @RequestMapping(method = RequestMethod.POST, path = "auth/login") 
