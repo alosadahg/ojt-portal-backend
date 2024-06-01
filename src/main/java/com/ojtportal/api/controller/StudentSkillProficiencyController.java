@@ -33,7 +33,7 @@ public class StudentSkillProficiencyController {
             switch (authority.getAuthority()) {
                 case "ROLE_SUPERVISOR":
                     auth = principal.getEmail();
-                    user_type = authority.getAuthority().substring(5);
+                    user_type = authority.getAuthority().substring(5).toLowerCase();
                     break;
                 case "ROLE_STUDENT":
                     studentEmail = principal.getEmail();

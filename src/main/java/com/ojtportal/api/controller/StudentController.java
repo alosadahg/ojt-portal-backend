@@ -3,6 +3,7 @@ package com.ojtportal.api.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,15 +21,15 @@ public class StudentController {
     private StudentService studentService;
 
     @PostMapping("student/register")
-    public int registerNewStudentUser(StudentDTO student) {
+    public ResponseEntity<Integer> registerNewStudentUser(StudentDTO student) {
         UserEntity user = new UserEntity(student.getEmail(), student.getPassword(), student.getFirstname(),
                 student.getLastname());
-        return studentService.registerNewUserStudent(user, student.getStudentID(), student.getDegreeProgram());
+        return ResponseEntity.ok(studentService.registerNewUserStudent(user, student.getStudentID(), student.getDegreeProgram()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE') and not hasAuthority('ROLE_STUDENT')")
     @GetMapping("/get-all-students")
-    public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+    public ResponseEntity<List<Student>> getAllStudents() {
+        return ResponseEntity.ok(studentService.getAllStudents());
     }
 }

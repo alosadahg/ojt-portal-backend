@@ -31,16 +31,16 @@ public class LogbookController {
 
     @PreAuthorize("hasAuthority('ROLE_STUDENT') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("student/add-logbook-entry")
-    public String addLogbookEntry(@RequestBody LogbookEntryDTO logbookEntryDTO,
+    public ResponseEntity<String> addLogbookEntry(@RequestBody LogbookEntryDTO logbookEntryDTO,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return logbookService.addLogbookEntry(logbookEntryDTO, principal.getEmail());
+        return ResponseEntity.ok(logbookService.addLogbookEntry(logbookEntryDTO, principal.getEmail()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_STUDENT') and hasAuthority('ROLE_ACTIVE')")
     @PutMapping("student/update-logbook-entry")
-    public String updateLogbookEntry(@RequestBody LogbookEntryDTO logbookEntryDTO,
+    public ResponseEntity<String> updateLogbookEntry(@RequestBody LogbookEntryDTO logbookEntryDTO,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return logbookService.updateLogbookEntry(logbookEntryDTO, principal.getEmail());
+        return ResponseEntity.ok(logbookService.updateLogbookEntry(logbookEntryDTO, principal.getEmail()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
@@ -56,24 +56,24 @@ public class LogbookController {
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE') and not hasAuthority('ROLE_STUDENT')")
     @GetMapping("/supervisor/get-logbooks")
-    public List<LogbookEntry> getAllLogbooks(@RequestParam String supervisorEmail, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<List<LogbookEntry>> getSupervisorLogbooks(@RequestParam String supervisorEmail, @AuthenticationPrincipal UserPrincipal principal) {
         for (GrantedAuthority authority : principal.getAuthorities()) {
             if (authority.getAuthority().equals("ROLE_SUPERVISOR")) {
                 supervisorEmail = principal.getEmail();
             }
         }
-        return logbookService.getSupervisorLogbooks(supervisorEmail);
+        return ResponseEntity.ok(logbookService.getSupervisorLogbooks(supervisorEmail));
     }
 
     @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("/supervisor/reject-logbook")
-    public String rejectLogbook(int entryID, String remarks,  @AuthenticationPrincipal UserPrincipal principal) {
-        return logbookService.rejectLogbookEntry(entryID, remarks, principal.getEmail());
+    public ResponseEntity<String> rejectLogbook(int entryID, String remarks,  @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(logbookService.rejectLogbookEntry(entryID, remarks, principal.getEmail()));
     }
 
     @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("/supervisor/approve-logbook")
-    public String approveLogbook(int entryID, String remarks,  @AuthenticationPrincipal UserPrincipal principal) {
-        return logbookService.approveLogbookEntry(entryID, remarks, principal.getEmail());
+    public ResponseEntity<String> approveLogbook(int entryID, String remarks,  @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(logbookService.approveLogbookEntry(entryID, remarks, principal.getEmail()));
     }
 }

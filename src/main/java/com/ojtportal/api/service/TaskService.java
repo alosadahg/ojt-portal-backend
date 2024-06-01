@@ -1,9 +1,11 @@
 package com.ojtportal.api.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -101,12 +103,16 @@ public class TaskService {
         return "Successfully added the task in the training plan";
     }
 
-    public List<Task> getAllSkillsByStudent(String studentEmail) {
-        List<StudentTask> studentTasks = studentTaskRepo.findByStudent_User_Email(studentEmail);
-        List<Task> tasks = new ArrayList<Task>();
-        for (StudentTask studentTask : studentTasks) {
-            tasks.add(studentTask.getTask());
-        }
+    public List<Task> getAllTasksByStudent(String studentEmail, String auth, String user_type) {
+        List<Task> tasks = taskRepo.findByStudentTasks_Student_User_Email(studentEmail);
+        if(user_type.equalsIgnoreCase("supervisor")) {
+            if(!tasks.isEmpty()) {
+                if(tasks.get(0).getTrainingplan().getSupervisor().getUser().getEmail().equalsIgnoreCase(auth)) {
+                    return tasks;
+                }
+                return Collections.emptyList();
+            }
+        } 
         return tasks;
     }
 }

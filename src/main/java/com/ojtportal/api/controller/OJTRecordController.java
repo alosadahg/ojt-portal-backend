@@ -30,14 +30,14 @@ public class OJTRecordController {
 
     @PreAuthorize("hasAuthority('ROLE_SUPERVISOR') and hasAuthority('ROLE_ACTIVE')")
     @PostMapping("supervisor/add-intern")
-    public String addIntern(OJTRecordDTO record, @AuthenticationPrincipal UserPrincipal principal) {
-        return ojtRecordService.addOjtRecord(record, principal.getEmail());
+    public ResponseEntity<String> addIntern(OJTRecordDTO record, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(ojtRecordService.addOjtRecord(record, principal.getEmail()));
     }
     
     @PreAuthorize("hasAuthority('ROLE_STUDENT') and hasAuthority('ROLE_ACTIVE')")
     @PutMapping("student/join-team")
-    public int joinTeam(String teamCode, @AuthenticationPrincipal UserPrincipal principal) {
-        return ojtRecordService.joinTeam(principal.getEmail(), teamCode);
+    public ResponseEntity<Integer> joinTeam(String teamCode, @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(ojtRecordService.joinTeam(principal.getEmail(), teamCode));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
@@ -49,7 +49,7 @@ public class OJTRecordController {
             switch (authority.getAuthority()) {
                 case "ROLE_SUPERVISOR":
                     auth = principal.getEmail();
-                    user_type = authority.getAuthority().substring(5);
+                    user_type = authority.getAuthority().substring(5).toLowerCase();
                     break;
                 case "ROLE_STUDENT":
                     studentEmail = principal.getEmail();
