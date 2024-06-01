@@ -47,14 +47,19 @@ public class OJTRecordController {
         String user_type = "student";
         String auth = "";
         for (GrantedAuthority authority : principal.getAuthorities()) {
-            if (authority.getAuthority().equals("ROLE_ADMIN")) {
-                email = studentEmail;
-                user_type = "admin";
-            } 
-            if (authority.getAuthority().equals("ROLE_SUPERVISOR")) {
-                email = studentEmail;
-                user_type = "supervisor";
-                auth = principal.getEmail();
+            switch (authority.getAuthority()) {
+                case "ROLE_SUPERVISOR":
+                    auth = principal.getEmail();
+                    user_type = authority.getAuthority().substring(5);
+                    break;
+                case "ROLE_STUDENT":
+                    studentEmail = principal.getEmail();
+                    break;
+                case "ROLE_ACTIVE":
+                    break;
+                default:
+                    user_type = authority.getAuthority().substring(5).toLowerCase();
+                    break;
             } 
         }
         return ResponseEntity.ok(ojtRecordService.getAllOjtRecords(email, user_type, auth));

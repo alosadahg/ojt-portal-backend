@@ -104,15 +104,15 @@ public class OjtRecordService {
     }
 
     public List<OjtRecord> getAllOjtRecords(String studentEmail, String user_type, String auth) {
-        if(studentEmail.equals("all") && user_type.equals("admin")) {
-            return ojtRecordRepo.findAll();
-        }
         if(user_type.equals("supervisor")) {
             if(studentEmail.equals("all"))
                 return ojtRecordRepo.findBySupervisor_User_Email(auth);
             else
                 return List.of(ojtRecordRepo.findBySupervisor_User_EmailAndStudent_User_Email(auth, studentEmail));
         } 
+        if(studentEmail.equals("all") && !user_type.equals("student")) {
+            return ojtRecordRepo.findAll();
+        }
         return List.of(ojtRecordRepo.findByStudent_User_Email(studentEmail));
     }
 }
