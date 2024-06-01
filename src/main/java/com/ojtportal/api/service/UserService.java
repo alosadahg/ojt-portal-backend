@@ -82,6 +82,10 @@ public class UserService {
                     user.setUserStatus(AccountStatus.PENDING);
                 }
                 userRepo.save(user);
+                verification = PKGenerator.generate("verification");
+                String body = "Account activation code: " + verification;
+
+                emailService.sendSimpleMail(user.getEmail(), "OJT Portal Account Activation", body);
                 return 1;
             }
         }
@@ -126,10 +130,6 @@ public class UserService {
 
                         return LoginResponse.builder().userInfo(existingUser).accessToken(token).build().toString();
                     case PENDING:
-                        verification = PKGenerator.generate("verification");
-                        String body = "Account activation code: " + verification;
-
-                        emailService.sendSimpleMail(existingUser.getEmail(), "OJT Portal Account Activation", body);
                         return "ERROR: Account is still pending verification. Check email for the account activation code.";
                     case RESTRICTED:
                         return "ERROR: Account is restricted.";
