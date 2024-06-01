@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ import lombok.*;
 @Setter
 @Entity
 @Table(name = "logbook_entry")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class LogbookEntry {
     @Id
     @JsonProperty("entryId")

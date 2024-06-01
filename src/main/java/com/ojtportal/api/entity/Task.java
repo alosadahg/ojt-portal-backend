@@ -3,6 +3,7 @@ package com.ojtportal.api.entity;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "task")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

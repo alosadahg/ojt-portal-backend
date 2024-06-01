@@ -1,5 +1,7 @@
 package com.ojtportal.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "student_training_plan")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class StudentTrainingPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

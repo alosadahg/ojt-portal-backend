@@ -1,5 +1,6 @@
 package com.ojtportal.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -15,6 +16,7 @@ import lombok.*;
 @Setter
 @Entity
 @Table(name = "skill_trend")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SkillTrend {
     @Id
     private Integer skillId;
