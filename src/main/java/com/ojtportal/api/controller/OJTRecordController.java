@@ -43,7 +43,6 @@ public class OJTRecordController {
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
     @GetMapping("/get-ojt-records")
     public ResponseEntity<List<OjtRecord>> getAllOjtRecords(@RequestParam String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
-        String email = principal.getEmail();
         String user_type = "student";
         String auth = "";
         for (GrantedAuthority authority : principal.getAuthorities()) {
@@ -62,6 +61,6 @@ public class OJTRecordController {
                     break;
             } 
         }
-        return ResponseEntity.ok(ojtRecordService.getAllOjtRecords(email, user_type, auth));
+        return ResponseEntity.ok(ojtRecordService.getAllOjtRecords(studentEmail, user_type, auth));
     }
 }
