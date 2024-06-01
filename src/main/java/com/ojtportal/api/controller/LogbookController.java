@@ -3,6 +3,7 @@ package com.ojtportal.api.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,14 +44,14 @@ public class LogbookController {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
-    @GetMapping("student/get-all-entries")
-    public List<LogbookEntry> getAllEntries(@RequestParam String email, @AuthenticationPrincipal UserPrincipal principal) {
+    @GetMapping("/student/get-all-entries")
+    public ResponseEntity<List<LogbookEntry>> getAllEntries(@RequestParam String email, @AuthenticationPrincipal UserPrincipal principal) {
         for (GrantedAuthority authority : principal.getAuthorities()) {
             if (authority.getAuthority().equals("ROLE_STUDENT")) {
                 email = principal.getEmail();
             }
         }
-        return logbookService.getStudentLogbook(email);
+        return ResponseEntity.ok(logbookService.getStudentLogbook(email));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE') and not hasAuthority('ROLE_STUDENT')")

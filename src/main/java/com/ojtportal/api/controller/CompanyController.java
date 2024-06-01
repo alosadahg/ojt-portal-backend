@@ -44,16 +44,22 @@ public class CompanyController {
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
     public List<Company> getAllCompanies(@AuthenticationPrincipal UserPrincipal principal) {
         String email = "";
-        String user_type = "ADMIN";
+        String user_type = "student";
         for (GrantedAuthority authority : principal.getAuthorities()) {
-            if (authority.getAuthority().equals("ROLE_STUDENT")) {
-                email = principal.getEmail();
-                user_type = "STUDENT";
-            } 
-            if (authority.getAuthority().equals("ROLE_SUPERVISOR")) {
-                email = principal.getEmail();
-                user_type = "SUPERVISOR";
-            } 
+            switch (authority.getAuthority()) {
+                case "ROLE_SUPERVISOR":
+                    email = principal.getEmail();
+                    user_type = authority.getAuthority().substring(5);
+                    break;
+                case "ROLE_STUDENT":
+                    email = principal.getEmail();
+                    break;
+                case "ROLE_ACTIVE":
+                    break;
+                default:
+                    user_type = authority.getAuthority().substring(5).toLowerCase();
+                    break;
+            }
         }
         return companyService.getAllCompanies(email, user_type);
     }
