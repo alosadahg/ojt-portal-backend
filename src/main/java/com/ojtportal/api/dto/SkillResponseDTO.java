@@ -1,6 +1,5 @@
 package com.ojtportal.api.dto;
 
-import java.text.DecimalFormat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

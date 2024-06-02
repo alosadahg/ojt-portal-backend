@@ -59,60 +59,99 @@ public class LogbookService {
         }
         LocalDateTime ldt = LocalDateTime.now();
         ZonedDateTime now = ldt.atZone(ZoneId.of("Asia/Manila"));
-        // System.out.println("NOW: "+ now.format(DateTimeFormatter.ofPattern("EEEE,
-        // MMMM dd, yyyy, hh:mm a")));
+
         LocalDateTime timeIn = entry.getEntry().getTimeIn();
         LocalDateTime timeOut = entry.getEntry().getTimeOut();
-        // Validating time entries
+
+        // Validate time entries and check for overlapping logbook entries
+        String timeError = validateTimeAndCheckOverlap(timeIn, timeOut, now, record);
+        if (timeError != null) {
+            return timeError;
+        }
+
+        LogbookEntry newEntry = new LogbookEntry(timeIn, timeOut, entry.getEntry().getActivities(), record);
+
+        // Associate tasks with the new logbook entry
+        String taskError = associateTasksWithEntry(entry, record, newEntry);
+        if (taskError != null) {
+            return taskError;
+        }
+
+        // Handling skills associated with the logbook entry
+        handleSkillsForEntry(entry, record);
+
+        // Saving the OJT record and return the new logbook entry
+        record.getLogbookEntries().add(newEntry);
+        logbookEntryRepo.save(newEntry);
+        ojtRecordRepo.save(record);
+
+        return logbookEntryRepo.findByTimein(timeIn).toString();
+    }
+
+    private String validateTimeAndCheckOverlap(LocalDateTime timeIn, LocalDateTime timeOut, ZonedDateTime now,
+            OjtRecord record) {
         if (!timeOut.isAfter(timeIn)) {
             return "ERROR: Time in must be earlier than the time out.";
         }
         if (timeIn.isAfter(now.toLocalDateTime()) || timeOut.isAfter(now.toLocalDateTime())) {
-            return "ERROR: Time must not be beyond the current date and time: " + now.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy, hh:mm a")) + ".";
+            return "ERROR: Time must not be beyond the current date and time: "
+                    + now.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy, hh:mm a")) + ".";
         }
-        // Checking for overlapping logbook entries
+
         List<LogbookEntry> existingEntries = record.getLogbookEntries();
         for (LogbookEntry existing : existingEntries) {
             if (existing.getTimeout().isAfter(timeIn)) {
-                return "ERROR: Time in cannot be before the time out in recent logbook entry record on " + existing.getTimeout().format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy, hh:mm a")) + ".";
+                return "ERROR: Time in cannot be before the time out in recent logbook entry record on "
+                        + existing.getTimeout().format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy, hh:mm a"))
+                        + ".";
             }
         }
-        LogbookEntry newEntry = new LogbookEntry(timeIn, timeOut, entry.getEntry().getActivities(), record);
-        // Associate tasks with the new logbook entry
+        return null;
+    }
+
+    private String associateTasksWithEntry(LogbookEntryDTO entry, OjtRecord record, LogbookEntry newEntry) {
         if (entry.getTaskIDs() != null) {
-            List<Task> tasks = new ArrayList<Task>();
+            List<Task> tasks = new ArrayList<>();
             for (Integer taskID : entry.getTaskIDs()) {
                 Optional<Task> taskOpt = taskRepo.findById(taskID);
                 if (taskOpt.isPresent()) {
                     Task task = taskOpt.get();
                     StudentTask studentTask = studentTaskRepo.findByStudentAndTask(record.getStudent(), task);
                     if (studentTask == null) {
-                        return "ERROR: Invalid Task. Supervisor has not assigned the student with this task ID: " + taskID;
+                        return "ERROR: Invalid Task. Supervisor has not assigned the student with this task ID: "
+                                + taskID;
                     }
                     studentTask.setStatus(TaskStatus.COMPLETED);
                     studentTaskRepo.save(studentTask);
+
                     // Update the completedTasks count for the StudentTrainingPlan
                     StudentTrainingPlan studentTrainingPlan = studentTrainingPlanRepo
                             .findByStudentAndTrainingPlan(record.getStudent(), task.getTrainingplan());
                     studentTrainingPlan.setCompletedTasks(studentTrainingPlan.getCompletedTasks() + 1);
                     studentTrainingPlanRepo.save(studentTrainingPlan);
+
                     tasks.add(task);
                 }
             }
             newEntry.setTasks(tasks);
         }
-        // Handling skills associated with the logbook entry
+        return null;
+    }
+
+    private void handleSkillsForEntry(LogbookEntryDTO entry, OjtRecord record) {
         if (entry.getSkills() != null) {
             for (SkillDTO skillDTO : entry.getSkills()) {
                 Skill added = skillService.addSkill(skillDTO.getSkill_name(), skillDTO.getDomain());
                 Skill skill = skillRepo.findBySkillNameAndDomain(skillDTO.getSkill_name(), skillDTO.getDomain());
                 StudentSkillProficiency proficiency = studentSkillProficiencyRepo.findBySkillAndStudent(skill,
                         record.getStudent());
+
                 if (added == null) {
                     SkillTrend trend = skillTrendRepo.findBySkill(skill);
                     trend.setSkillFrequency(trend.getSkillFrequency() + 1);
                     skillTrendRepo.save(trend);
                 }
+
                 if (proficiency == null) {
                     proficiency = new StudentSkillProficiency(record.getStudent(), skill);
                     proficiency.setFrequencyOfUse(1);
@@ -122,12 +161,6 @@ public class LogbookService {
                 studentSkillProficiencyRepo.save(proficiency);
             }
         }
-        // Saving the OJT record and return the new logbook entry
-        existingEntries.add(newEntry);
-        record.setLogbookEntries(existingEntries);
-        logbookEntryRepo.save(newEntry);
-        ojtRecordRepo.save(record);
-        return logbookEntryRepo.findByTimein(timeIn).toString();
     }
 
     public String approveLogbookEntry(int entry_id, String remarks, String supervisor_email) {
@@ -135,7 +168,7 @@ public class LogbookService {
         if (entryOpt.isEmpty())
             return "ERROR: Record for entry ID: " + entry_id + " not found.";
 
-        if(!entryOpt.get().getOjtrecord().getSupervisor().getUser().getEmail().equals(supervisor_email)) {
+        if (!entryOpt.get().getOjtrecord().getSupervisor().getUser().getEmail().equals(supervisor_email)) {
             return "ERROR: Supervisor has no access to this logbook entry ID.";
         }
         LogbookEntry entry = entryOpt.get();
@@ -167,9 +200,9 @@ public class LogbookService {
     public String rejectLogbookEntry(int entry_id, String remarks, String supervisor_email) {
         Optional<LogbookEntry> entryOpt = logbookEntryRepo.findById(entry_id);
         if (entryOpt.isEmpty())
-        return "ERROR: Record for entry ID: " + entry_id + " not found.";
+            return "ERROR: Record for entry ID: " + entry_id + " not found.";
 
-        if(!entryOpt.get().getOjtrecord().getSupervisor().getUser().getEmail().equals(supervisor_email)) {
+        if (!entryOpt.get().getOjtrecord().getSupervisor().getUser().getEmail().equals(supervisor_email)) {
             return "ERROR: Supervisor has no access to this logbook entry ID.";
         }
 
@@ -178,7 +211,7 @@ public class LogbookService {
         }
 
         LogbookEntry entry = entryOpt.get();
-        if(entry.getStatus().equals(LogbookStatus.APPROVED)) {
+        if (entry.getStatus().equals(LogbookStatus.APPROVED)) {
             return "ERROR: Logbook entry is already approved. Cannot proceed with further transactions.";
         }
         if (entry.getStatus().equals(LogbookStatus.PENDING)) {
@@ -216,10 +249,10 @@ public class LogbookService {
     public String updateLogbookEntry(LogbookEntryDTO logbookEntryDTO, String email) {
         LogbookEntry logbookEntry = logbookEntryRepo.findById(logbookEntryDTO.getEntry().getEntryID()).get();
         if (logbookEntry != null) {
-            if(!logbookEntry.getOjtrecord().getStudent().getUser().getEmail().equals(email)) {
+            if (!logbookEntry.getOjtrecord().getStudent().getUser().getEmail().equals(email)) {
                 return "ERROR: Invalid logbook entry ID: " + logbookEntryDTO.getEntry().getEntryID();
             }
-            if(logbookEntry.getStatus().equals(LogbookStatus.REJECTED)){
+            if (logbookEntry.getStatus().equals(LogbookStatus.REJECTED)) {
                 logbookEntry.setStatus(LogbookStatus.PENDING);
             }
             if (logbookEntry.getStatus().equals(LogbookStatus.APPROVED)) {

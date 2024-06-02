@@ -51,6 +51,10 @@ public class Task {
         inverseJoinColumns = @JoinColumn(name = "skill_id"))
     List<Skill> skills;    
     
+    public Task(Integer taskId) {
+        this.taskId = taskId;
+    }
+
     public Task(String title, String desription, String objective, TrainingPlan trainingPlan) {
         this.title = title;
         this.description = desription;
