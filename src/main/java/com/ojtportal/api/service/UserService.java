@@ -174,10 +174,28 @@ public class UserService {
         userRepo.save(user);
     }
 
+    public int activateUser(String email) {
+        UserEntity user = userRepo.findByEmail(email);
+        if(user == null || user.getUserStatus().equals(AccountStatus.ACTIVE))
+            return 0;
+        user.setUserStatus(AccountStatus.ACTIVE);
+        userRepo.save(user);
+        return 1;
+    }
+
     public void restrictUser(Long uid) {
         UserEntity user = getUserEntity(uid);
         user.setUserStatus(AccountStatus.RESTRICTED);
         userRepo.save(user);
+    }
+
+    public int restrictUser(String email) {
+        UserEntity user = userRepo.findByEmail(email);
+        if(user == null || user.getUserStatus().equals(AccountStatus.RESTRICTED))
+            return 0;
+        user.setUserStatus(AccountStatus.RESTRICTED);
+        userRepo.save(user);
+        return 1;
     }
 
     public int registerAdmin(UserEntity user) {

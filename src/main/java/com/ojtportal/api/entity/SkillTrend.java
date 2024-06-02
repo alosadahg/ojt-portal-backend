@@ -1,5 +1,6 @@
 package com.ojtportal.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,9 +21,11 @@ import lombok.*;
 public class SkillTrend {
     @Id
     private Integer skillId;
-    private String trendDirection = "";
-    private String prediction = "";
+    private double demandChange = 0.0;
+    private String trend = "";
     private int skillFrequency = 0;
+
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     private RecordVisibility visibility = RecordVisibility.VISIBLE;
 

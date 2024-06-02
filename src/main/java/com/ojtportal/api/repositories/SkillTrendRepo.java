@@ -9,4 +9,5 @@ import com.ojtportal.api.entity.SkillTrend;
 @Repository
 public interface SkillTrendRepo extends JpaRepository<SkillTrend, Integer> {
     SkillTrend findBySkill(Skill skill);
+    SkillTrend findBySkill_SkillName(String skillName);
 }

@@ -21,6 +21,19 @@ public class EvaluationService {
     @Autowired
     private SupervisorRepo supervisorRepo;
 
+    public List<Evaluation> getEvaluationRecord(String studentEmail, String auth, String user_type) {
+        if(user_type.equals("supervisor")) {
+            if(studentEmail.equals("all"))
+                return evaluationRepo.findByOjtrecord_Supervisor_User_Email(auth);
+            else
+                return List.of(evaluationRepo.findByOjtrecord_Student_User_EmailAndOjtrecord_Supervisor_User_Email(studentEmail, auth));
+        } 
+        if(studentEmail.equals("all") && !user_type.equals("student")) {
+            return evaluationRepo.findAll();
+        }
+        return List.of(evaluationRepo.findByOjtrecord_Student_User_Email(studentEmail));
+    }
+
     public String addInstructorFeedback(String remarks, double grade, String student_email) {
         OjtRecord record = ojtRecordRepo.findByStudent_User_Email(student_email);
         if (record != null) {

@@ -84,4 +84,16 @@ public class UserController {
     public ResponseEntity<Integer> activateUser(String email, String verificationCode) {
         return ResponseEntity.ok(userService.authenticate(email,"", verificationCode, "activation"));
     }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_ACTIVE')")
+    @PutMapping("/admin/activate-user")
+    public ResponseEntity<Integer> activateUser(String email) {
+        return ResponseEntity.ok(userService.activateUser(email));
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_ACTIVE')")
+    @PutMapping("/admin/restrict-user")
+    public ResponseEntity<Integer> restrictUser(String email) {
+        return ResponseEntity.ok(userService.restrictUser(email));
+    }
 }
