@@ -60,10 +60,10 @@ public class UserController {
         return ResponseEntity.ok(userService.login(existingUser));
     }
 
-    @PostMapping("auth/logout") 
-    public ResponseEntity<String> logoutUser() {
-        return ResponseEntity.ok("1");
-    }
+    // @PostMapping("auth/logout") 
+    // public ResponseEntity<String> logoutUser() {
+    //     return ResponseEntity.ok("1");
+    // }
 
     @PutMapping("auth/change-password") 
     public ResponseEntity<String> changePassword(Long userID, String oldPassword, String newPassword) {

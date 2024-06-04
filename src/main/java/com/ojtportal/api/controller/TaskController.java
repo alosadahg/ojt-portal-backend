@@ -30,7 +30,7 @@ public class TaskController {
 
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
     @GetMapping("/get-student-allTasks")
-    public ResponseEntity<List<Task>> getAllSkillsByStudent(@RequestParam String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<List<Task>> getAllTasksByStudent(@RequestParam String studentEmail, @AuthenticationPrincipal UserPrincipal principal) {
         String auth = "";
         String user_type = "student";
         for (GrantedAuthority authority : principal.getAuthorities()) {

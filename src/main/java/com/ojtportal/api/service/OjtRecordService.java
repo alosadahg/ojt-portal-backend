@@ -49,7 +49,7 @@ public class OjtRecordService {
         if (existing != null)
             student = studentRepo.findById(existing.getUid()).get();
             Supervisor supervisor = supervisorRepo.findByUser_Email(supervisorEmail);
-            if (supervisor == null) return "ERROR: Supervisor record does not exist";
+            // if (supervisor == null) return "ERROR: Supervisor record does not exist";
             UserEntity supervisorUser = userRepo.findById(supervisor.getUserid()).get();
             Company company = companyRepo.findById(supervisor.getCompany().getId()).get();
             String recordPK = "";
@@ -61,8 +61,8 @@ public class OjtRecordService {
                     }
                     OjtRecord newRecord = new OjtRecord(record.getDesignation(), record.getDepartment(), record.getOjtHours(), company, student,
                             supervisor);
-                    Evaluation eval = new Evaluation(newRecord);
-                    evaluationRepo.save(eval);
+                    // Evaluation eval = new Evaluation(newRecord);
+                    // evaluationRepo.save(eval);
                     ojtRecordRepo.save(newRecord);
                     recordPK = ojtRecordRepo.findByStudent_Userid(student.getUserid()).getRecordNo();
                     notif = "Intern is now invited to join the team.";

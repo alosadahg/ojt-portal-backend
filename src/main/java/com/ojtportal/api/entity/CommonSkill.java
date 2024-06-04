@@ -24,9 +24,9 @@ import lombok.Setter;
 public class CommonSkill {
     @Id
     private int id;
-    @Column(name = "Skill")
+    @Column(name = "skill")
     private String skill;
-    @Column(name = "Domain")
+    @Column(name = "domain")
     private String domain;
 
     @Override

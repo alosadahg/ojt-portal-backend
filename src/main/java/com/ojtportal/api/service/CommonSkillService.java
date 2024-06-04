@@ -16,7 +16,7 @@ public class CommonSkillService {
 
     @Cacheable(value = "skills")
     public List<CommonSkill> getAllSkills() {
-        return commonSkillsRepo.findAll();
+        return commonSkillsRepo.findByDomain("Object or component oriented development software");
     }
 
     public List<CommonSkill> getSkillsThatContains() {
