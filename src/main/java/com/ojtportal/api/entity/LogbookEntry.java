@@ -68,7 +68,6 @@ public class LogbookEntry {
         inverseJoinColumns = @JoinColumn(name = "task_id"))
     private List<Task> tasks = new ArrayList<Task>();
 
-    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "logbook_skill", joinColumns = @JoinColumn(name = "entry_id"),
         inverseJoinColumns = @JoinColumn(name = "skill_id"))

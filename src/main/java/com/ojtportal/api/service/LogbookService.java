@@ -92,6 +92,7 @@ public class LogbookService {
             }
             newEntry.setTasks(tasks);
         }
+        List<Skill> logbookSkills = new ArrayList<Skill>();
         // Handling skills associated with the logbook entry
         if (entry.getSkills() != null) {
             for (SkillDTO skillDTO : entry.getSkills()) {
@@ -111,8 +112,11 @@ public class LogbookService {
                     proficiency.setFrequencyOfUse(proficiency.getFrequencyOfUse() + 1);
                 }
                 studentSkillProficiencyRepo.save(proficiency);
+                logbookSkills.add(skill);
             }
+            newEntry.setSkills(logbookSkills);
         }
+        
         // Saving the OJT record and return the new logbook entry
         existingEntries.add(newEntry);
         record.setLogbookEntries(existingEntries);
@@ -298,6 +302,7 @@ public class LogbookService {
             if (logbookEntry.getStatus().equals(LogbookStatus.APPROVED)) {
                 return "ERROR: Logbook is already approved. Update is prohibited";
             }
+            return "ERROR: Update not allowed. Entry is still pending and awaiting supervisor feedback";
         }
         return "ERROR: Logbook entry not found";
     }
