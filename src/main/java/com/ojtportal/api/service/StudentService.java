@@ -34,9 +34,9 @@ public class StudentService {
 
     public int registerNewUserStudent(UserEntity user, String studentID, String department) {
         user.setAccountType(Role.ROLE_STUDENT);
-        // if(userService.addUser(user)==0){
-        //     return registerUserToStudent(userRepo.findByEmail(user.getEmail()).getUid(), studentID, department);
-        // }
+        if(userService.addUser(user)==0){
+            return registerUserToStudent(userRepo.findByEmail(user.getEmail()).getUid(), studentID, department);
+        }
         UserEntity savedUser = userService.getUserEntity(user.getUid());
         if(unregisteredInternRepo.existsById(user.getEmail())) {
             UnregisteredIntern intern = unregisteredInternRepo.findById(user.getEmail()).get();
