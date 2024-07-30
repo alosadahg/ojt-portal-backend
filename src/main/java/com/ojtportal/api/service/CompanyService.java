@@ -81,9 +81,9 @@ public class CompanyService {
 
     public List<Company> getAllCompanies(String email, String user_type) {
         OjtRecord record = null;
-        if(user_type.equals("STUDENT")) {
+        if(user_type.equalsIgnoreCase("student")) {
             record = ojtRecordRepo.findByStudent_User_Email(email);
-        } else if(user_type.equals("SUPERVISOR")) {
+        } else if(user_type.equalsIgnoreCase("supervisor")) {
             record = ojtRecordRepo.findBySupervisor_User_Email(email).get(0);
         } else {
             return companyRepo.findAll();

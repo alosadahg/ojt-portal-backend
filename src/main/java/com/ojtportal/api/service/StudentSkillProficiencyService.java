@@ -1,6 +1,5 @@
 package com.ojtportal.api.service;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,65 +26,68 @@ public class StudentSkillProficiencyService {
         Map<Student, List<StudentSkillProficiency>> proficiencies = new HashMap<>();
         List<Student> students = new ArrayList<Student>();
         List<OjtRecord> records = new ArrayList<>();
-        
+
+        if (studentEmail.equalsIgnoreCase("all")) {
+            if (user_type.equalsIgnoreCase("admin") || user_type.equalsIgnoreCase("chair")
+                    || user_type.equalsIgnoreCase("instructor")) {
+                records = ojtRecordRepo.findAll();
+                for (OjtRecord record : records) {
+                    Student student = record.getStudent();
+                    if (student != null) {
+                        students.add(student);
+                    }
+                }
+                for (Student student : students) {
+                    List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo
+                            .findByStudent(student);
+                    if (studentProficiencies == null) {
+                        studentProficiencies = new ArrayList<>();
+                    }
+                    proficiencies.put(student, studentProficiencies);
+                }
+                return proficiencies.toString();
+            }
+        }
+        if (user_type.equalsIgnoreCase("supervisor")) {
             if (studentEmail.equalsIgnoreCase("all")) {
-                if (user_type.equalsIgnoreCase("admin") || user_type.equalsIgnoreCase("chair") || user_type.equalsIgnoreCase("instructor")) {
-                    records = ojtRecordRepo.findAll();
-                    for (OjtRecord record : records) {
-                        Student student = record.getStudent();
-                        if (student != null) {
-                            students.add(student);
-                        }
+                records = ojtRecordRepo.findBySupervisor_User_Email(auth);
+                for (OjtRecord record : records) {
+                    Student student = record.getStudent();
+                    if (student != null) {
+                        students.add(student);
                     }
-                    for (Student student : students) {
-                        List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo.findByStudent(student);
-                        if (studentProficiencies == null) {
-                            studentProficiencies = new ArrayList<>();
-                        }
-                        proficiencies.put(student, studentProficiencies);
+                }
+                for (Student student : students) {
+                    List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo
+                            .findByStudent(student);
+                    if (studentProficiencies == null) {
+                        studentProficiencies = new ArrayList<>();
                     }
+                    proficiencies.put(student, studentProficiencies);
+                }
+                return proficiencies.toString();
+            } else {
+                OjtRecord record = ojtRecordRepo.findBySupervisor_User_EmailAndStudent_User_Email(auth, studentEmail);
+                if (record != null) {
+                    List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo
+                            .findByStudent(record.getStudent());
+                    if (studentProficiencies == null) {
+                        studentProficiencies = new ArrayList<>();
+                    }
+                    proficiencies.put(record.getStudent(), studentProficiencies);
                     return proficiencies.toString();
                 }
+                return "ERROR: Record for " + studentEmail + " is unaccessible.";
             }
-            if (user_type.equalsIgnoreCase("supervisor")) {
-                if (studentEmail.equalsIgnoreCase("all")) {
-                    records = ojtRecordRepo.findBySupervisor_User_Email(auth);
-                    for (OjtRecord record : records) {
-                        Student student = record.getStudent();
-                        if (student != null) {
-                            students.add(student);
-                        }
-                    }
-                    for (Student student : students) {
-                        List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo.findByStudent(student);
-                        if (studentProficiencies == null) {
-                            studentProficiencies = new ArrayList<>();
-                        }
-                        proficiencies.put(student, studentProficiencies);
-                    }
-                    return proficiencies.toString();
-                } 
-                else {
-                    OjtRecord record = ojtRecordRepo.findBySupervisor_User_EmailAndStudent_User_Email(auth, studentEmail);
-                    if (record != null) {
-                        List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo.findByStudent(record.getStudent());
-                        if (studentProficiencies == null) {
-                            studentProficiencies = new ArrayList<>();
-                        }
-                        proficiencies.put(record.getStudent(), studentProficiencies);
-                        return proficiencies.toString();
-                    }
-                    return "ERROR: Record for " + studentEmail + " is unaccessible.";
-                }
+        }
+        Student student = studentRepo.findByUser_Email(studentEmail);
+        if (student != null) {
+            List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo.findByStudent(student);
+            if (studentProficiencies == null) {
+                studentProficiencies = new ArrayList<>();
             }
-            Student student = studentRepo.findByUser_Email(studentEmail);
-            if (student != null) {
-                List<StudentSkillProficiency> studentProficiencies = studentSkillProficiencyRepo.findByStudent(student);
-                if (studentProficiencies == null) {
-                    studentProficiencies = new ArrayList<>();
-                }
-                proficiencies.put(student, studentProficiencies);
-            }
-            return proficiencies.toString();
+            proficiencies.put(student, studentProficiencies);
+        }
+        return proficiencies.toString();
     }
 }

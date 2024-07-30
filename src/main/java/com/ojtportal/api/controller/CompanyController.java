@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import com.ojtportal.api.config.security.UserPrincipal;
 import com.ojtportal.api.entity.Company;
 import com.ojtportal.api.entity.Student;
-import com.ojtportal.api.entity.Supervisor;
 import com.ojtportal.api.repositories.SupervisorRepo;
 import com.ojtportal.api.service.CompanyService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,11 +35,11 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.addCompany(company_name, contactNo, email, address));
     }
 
-    @PostMapping("/add-by-student")
-    @Secured({"ROLE_STUDENT"})
-    public ResponseEntity<Integer> addCompany(String company_name) {
-        return ResponseEntity.ok(companyService.addCompany(company_name));
-    }
+    // @PostMapping("/add-by-student")
+    // @Secured({"ROLE_STUDENT"})
+    // public ResponseEntity<Integer> addCompany(String company_name) {
+    //     return ResponseEntity.ok(companyService.addCompany(company_name));
+    // }
 
     @GetMapping("/get-all-companies")
     @PreAuthorize("hasAuthority('ROLE_ACTIVE')")
@@ -65,6 +65,7 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.getAllCompanies(email, user_type));
     }
 
+    @Operation(summary = "Get all students by company name")
     @GetMapping("/get-all-students")
     @PreAuthorize("hasAuthority('ROLE_ACTIVE') and not hasAuthority('ROLE_STUDENT')")
     public ResponseEntity<List<Student>> getStudentsByCompany(@RequestParam String companyName, @AuthenticationPrincipal UserPrincipal principal) {
@@ -76,14 +77,14 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.getStudentsByCompany(companyName));
     }
 
-    @GetMapping("/get-all-supervisors")
-    @PreAuthorize("hasAuthority('ROLE_ACTIVE') and not hasAuthority('ROLE_STUDENT')")
-    public ResponseEntity<List<Supervisor>> getSupervisorsByCompany(@RequestParam String companyName, @AuthenticationPrincipal UserPrincipal principal) {
-        for (GrantedAuthority authority : principal.getAuthorities()) {
-            if (authority.getAuthority().equals("ROLE_SUPERVISOR")) {
-                companyName = supervisorRepo.findByUser_Email(principal.getEmail()).getCompany().getCompanyName();
-            } 
-        }
-        return ResponseEntity.ok(companyService.getSupervisorsByCompany(companyName));
-    }
+    // @GetMapping("/get-all-supervisors")
+    // @PreAuthorize("hasAuthority('ROLE_ACTIVE') and not hasAuthority('ROLE_STUDENT')")
+    // public ResponseEntity<List<Supervisor>> getSupervisorsByCompany(@RequestParam String companyName, @AuthenticationPrincipal UserPrincipal principal) {
+    //     for (GrantedAuthority authority : principal.getAuthorities()) {
+    //         if (authority.getAuthority().equals("ROLE_SUPERVISOR")) {
+    //             companyName = supervisorRepo.findByUser_Email(principal.getEmail()).getCompany().getCompanyName();
+    //         } 
+    //     }
+    //     return ResponseEntity.ok(companyService.getSupervisorsByCompany(companyName));
+    // }
 }

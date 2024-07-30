@@ -76,12 +76,12 @@ public class UserController {
     }
 
     @PutMapping("auth/forget-password/verify") 
-    public ResponseEntity<Integer> forgetPassword(String email, String password, String otp) {
+    public ResponseEntity<Integer> verifyForgetPassword(String email, String password, String otp) {
         return ResponseEntity.ok(userService.authenticate(email, password, otp, "password-change"));
     }
 
     @PutMapping("auth/activate")
-    public ResponseEntity<Integer> activateUser(String email, String verificationCode) {
+    public ResponseEntity<Integer> authenticateUser(String email, String verificationCode) {
         return ResponseEntity.ok(userService.authenticate(email,"", verificationCode, "activation"));
     }
 
