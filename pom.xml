@@ -96,6 +96,22 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core</artifactId>
+			<version>2.2.22</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+
 
 	</dependencies>
 
@@ -119,16 +135,16 @@
 		        <version>2.13.0</version>
 		        <configuration>
 		            <schemaVersion>v2</schemaVersion>
-		            <subscriptionId>d52dab6a-aad7-4dbb-875d-a8f85f57ae2b</subscriptionId>
-		            <resourceGroup>appsvc_linux_centralus</resourceGroup>
+		            <subscriptionId>b4e9512b-4d7c-43f6-a6a6-59064939366c</subscriptionId>
+		            <resourceGroup>ojt-portal-resource</resourceGroup>
 		            <appName>ojt-backend</appName>
 		            <pricingTier>B1</pricingTier>
-		            <region>centralus</region>
-		            <appServicePlanName>ASP-appsvclinuxcentralus-a1f8</appServicePlanName>
-		            <appServicePlanResourceGroup>appsvc_linux_centralus</appServicePlanResourceGroup>
+		            <region>eastus</region>
+		            <appServicePlanName>ASP-ojtportalresource-a89f</appServicePlanName>
+		            <appServicePlanResourceGroup>ojt-portal-resource</appServicePlanResourceGroup>
 		            <runtime>
 		                <os>Linux</os>
-		                <javaVersion>Java 21</javaVersion>
+		                <javaVersion>Java 17</javaVersion>
 		                <webContainer>Java SE</webContainer>
 		            </runtime>
 		            <deployment>
