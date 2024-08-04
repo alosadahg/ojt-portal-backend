@@ -57,8 +57,7 @@ public class LogbookService {
         if (record == null) {
             return "ERROR: No OJT record found.";
         }
-        LocalDateTime ldt = LocalDateTime.now();
-        ZonedDateTime now = ldt.atZone(ZoneId.of("Asia/Manila"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Manila"));
         // System.out.println("NOW: "+ now.format(DateTimeFormatter.ofPattern("EEEE,
         // MMMM dd, yyyy, hh:mm a")));
         LocalDateTime timeIn = entry.getEntry().getTimeIn();
@@ -125,12 +124,12 @@ public class LogbookService {
         return logbookEntryRepo.findByTimein(timeIn).toString();
     }
 
-    private String validateTimeAndCheckOverlap(LocalDateTime timeIn, LocalDateTime timeOut, ZonedDateTime now,
+    private String validateTimeAndCheckOverlap(LocalDateTime timeIn, LocalDateTime timeOut, LocalDateTime now,
             OjtRecord record) {
         if (!timeOut.isAfter(timeIn)) {
             return "ERROR: Time in must be earlier than the time out.";
         }
-        if (timeIn.isAfter(now.toLocalDateTime()) || timeOut.isAfter(now.toLocalDateTime())) {
+        if (timeIn.isAfter(now) || timeOut.isAfter(now)) {
             return "ERROR: Time must not be beyond the current date and time: "
                     + now.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy, hh:mm a")) + ".";
         }
