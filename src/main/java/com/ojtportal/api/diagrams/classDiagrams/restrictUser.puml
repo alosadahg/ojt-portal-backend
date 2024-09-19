@@ -1,0 +1,92 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class UserController << RestController >> {
+  - userService: UserService
+  + registerAdmin(UserEntity): ResponseEntity<Integer>
+  + forgetPassword(String): ResponseEntity<Integer>
+  + verifyForgetPassword(String, String, String): ResponseEntity<Integer>
+  + getMyUserDetails(UserPrincipal): ResponseEntity<String>
+  + authenticateUser(String, String): ResponseEntity<Integer>
+  + activateUser(String): ResponseEntity<Integer>
+  + loginUser(UserEntity): ResponseEntity<String>
+  + restrictUser(String): ResponseEntity<Integer>
+  + getAllUsers(): ResponseEntity<List<UserEntity>>
+  + getAnyUserDetails(String): ResponseEntity<String>
+  + registerInstructor(UserEntity): ResponseEntity<Integer>
+  + registerChair(UserEntity): ResponseEntity<Integer>
+  + changePassword(Long, String, String): ResponseEntity<String>
+}
+class UserEntity << Entity >>{
+  - uid: long
+  - accountType: Role
+  - firstname: String
+  - userStatus: AccountStatus
+  - email: String
+  - password: String
+  - lastname: String
+  + equals(Object): boolean
+  + getAccountType(): Role
+  + setAccountType(Role): void
+  # canEqual(Object): boolean
+  + setUid(long): void
+  + hashCode(): int
+  + getUid(): long
+  + getEmail(): String
+  + setFirstname(String): void
+  + getLastname(): String
+  + setUserStatus(AccountStatus): void
+  + setPassword(String): void
+  + getPassword(): String
+  + getUserStatus(): AccountStatus
+  + setEmail(String): void
+  + setLastname(String): void
+  + getFirstname(): String
+  + toString(): String
+}
+interface UserRepo << Repository>> {
+  + findByEmailAndPassword(String, String): UserEntity
+  + findByEmail(String): UserEntity
+  + findByAccountType(String): List<UserEntity>
+  + findByUserStatus(String): List<UserEntity>
+}
+class UserService << Service >> {
+  - verification: String
+  - emailService: EmailService
+  - principal: UserPrincipal
+  - issuer: JwtIssuer
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - studentRepo: StudentRepo
+  - trainingPlanService: TrainingPlanService
+  - taskRepo: TaskRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - userRepo: UserRepo
+  - authenticationManager: AuthenticationManager
+  - supervisorRepo: SupervisorRepo
+  - studentTaskRepo: StudentTaskRepo
+  + addUser(UserEntity): int
+  - getSupervisorInfo(String): SupervisorFullDTO
+  + getUserEntity(Long): UserEntity
+  + forgetPassword(String): int
+  + registerChair(UserEntity): int
+  + getAllUsers(): List<UserEntity>
+  + getUserInfo(Long): String
+  + restrictUser(Long): void
+  + restrictUser(String): int
+  + activateUser(Long): void
+  + getStudentFullInfo(String): StudentFullDTO
+  + activateUser(String): int
+  + registerAdmin(UserEntity): int
+  + authenticate(String, String, String, String): int
+  + login(UserEntity): String
+  + registerInstructor(UserEntity): int
+  + changePassword(Long, String, String): String
+}
+
+UserController  -[#595959,dashed]->  UserEntity
+UserController  -[#595959,dashed]->  UserService
+UserRepo        -[#595959,dashed]->  UserEntity
+UserService     -[#595959,dashed]->  UserEntity
+UserService     -[#595959,dashed]->  UserRepo
+@enduml

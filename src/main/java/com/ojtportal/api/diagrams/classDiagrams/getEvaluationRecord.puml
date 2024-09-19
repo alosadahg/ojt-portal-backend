@@ -1,0 +1,85 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Evaluation << Entity >> {
+  - supervisorRemark: String
+  - evalId: Integer
+  - supervisorgivenGrade: double
+  - ojtrecord: OjtRecord
+  - studentFeedback: String
+  - overallGrade: double
+  - visibility: RecordVisibility
+  - instructorgivenGrade: double
+  - instructorRemark: String
+  + getEvalId(): Integer
+  + setVisibility(RecordVisibility): void
+  + setInstructorRemark(String): void
+  + equals(Object): boolean
+  + setInstructorgivenGrade(double): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getOverallGrade(): double
+  + getSupervisorRemark(): String
+  + getVisibility(): RecordVisibility
+  + setOverallGrade(double): void
+  + getOjtrecord(): OjtRecord
+  + setStudentFeedback(String): void
+  + getInstructorRemark(): String
+  + getInstructorgivenGrade(): double
+  + getStudentFeedback(): String
+  + setSupervisorRemark(String): void
+  + getSupervisorgivenGrade(): double
+  + setOjtrecord(OjtRecord): void
+  + setSupervisorgivenGrade(double): void
+  + setEvalId(Integer): void
+  + calculateTotalGrade(): void
+  + toString(): String
+}
+class EvaluationController << RestController >> {
+  - evaluationService: EvaluationService
+  + getEvaluationRecord(String, UserPrincipal): ResponseEntity<List<Evaluation>>
+  + addSupervisorFeedback(double, String, String, UserPrincipal): ResponseEntity<String>
+  + addInstructorFeedback(double, String, String, UserPrincipal): ResponseEntity<String>
+  + addStudentFeedback(String, UserPrincipal): ResponseEntity<Integer>
+}
+interface EvaluationRepo << Repository>> {
+  + findByOjtrecord_RecordNo(String): Evaluation
+  + findByOjtrecord(OjtRecord): Evaluation
+  + findByOjtrecord_Student_User_EmailAndOjtrecord_Supervisor_User_Email(String, String): Evaluation
+  + findByOjtrecord_Student_User_Email(String): Evaluation
+  + findByOjtrecord_Supervisor_User_Email(String): List<Evaluation>
+}
+class EvaluationService << Service >> {
+  - evaluationRepo: EvaluationRepo
+  - supervisorRepo: SupervisorRepo
+  - ojtRecordRepo: OjtRecordRepo
+  + addInstructorFeedback(String, double, String): String
+  + addSupervisorFeedback(String, double, String, String): String
+  + getEvaluationRecord(String, String, String): List<Evaluation>
+  + addStudentFeedback(String, String): int
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+EvaluationController  -[#595959,dashed]->  Evaluation
+EvaluationController  -[#595959,dashed]->  EvaluationService
+EvaluationController  -[#595959,dashed]->  UserPrincipal
+EvaluationRepo        -[#595959,dashed]->  Evaluation
+EvaluationService     -[#595959,dashed]->  Evaluation           : "«create»"
+EvaluationService     -[#595959,dashed]->  EvaluationRepo
+@enduml

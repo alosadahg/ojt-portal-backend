@@ -1,0 +1,58 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Student << Entity >> {
+  - degreeProgram: String
+  - skillFrequencies: List<StudentSkillProficiency>
+  - studentTasks: List<StudentTask>
+  - ojtRecord: OjtRecord
+  - studentid: String
+  - userid: long
+  - user: UserEntity
+  + getStudentid(): String
+  + getUserid(): long
+  + getDegreeProgram(): String
+  + setStudentid(String): void
+  + setUser(UserEntity): void
+  + setStudentTasks(List<StudentTask>): void
+  + getUser(): UserEntity
+  + setUserid(long): void
+  + setOjtRecord(OjtRecord): void
+  + setSkillFrequencies(List<StudentSkillProficiency>): void
+  + getOjtRecord(): OjtRecord
+  + getSkillFrequencies(): List<StudentSkillProficiency>
+  + setDegreeProgram(String): void
+  + getStudentTasks(): List<StudentTask>
+  + hashCode(): int
+  + toString(): String
+  + equals(Object): boolean
+}
+class StudentController << RestController >> {
+  - studentService: StudentService
+  + registerNewStudentUser(StudentDTO): ResponseEntity<Integer>
+  + getAllStudents(): ResponseEntity<List<Student>>
+}
+interface StudentRepo << Repository>> {
+  + findByUser_Email(String): Student
+  + findByStudentid(String): Student
+  + findByStudentidAndUserid(String, Long): Student
+}
+class StudentService << Service >> {
+  - emailService: EmailService
+  - unregisteredInternRepo: UnregisteredInternRepo
+  - userRepo: UserRepo
+  - userService: UserService
+  - studentRepo: StudentRepo
+  + registerUserToStudent(Long, String, String): int
+  + registerNewUserStudent(UserEntity, String, String): int
+  + getAllStudents(): List<Student>
+  + getStudentByStudentID(String): Student
+}
+
+StudentController  -[#595959,dashed]->  Student
+StudentController  -[#595959,dashed]->  StudentService
+StudentRepo        -[#595959,dashed]->  Student
+StudentService     -[#595959,dashed]->  Student           : "«create»"
+StudentService     -[#595959,dashed]->  StudentRepo
+@enduml

@@ -1,0 +1,82 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Task << Entity >> {
+  ~ skills: List<Skill>
+  - taskId: Integer
+  - visibility: RecordVisibility
+  - trainingplan: TrainingPlan
+  - description: String
+  - objective: String
+  - title: String
+  - studentTasks: List<StudentTask>
+  + toString(): String
+  + setTitle(String): void
+  + setDescription(String): void
+  + setVisibility(RecordVisibility): void
+  + getSkills(): List<Skill>
+  + getStudentTasks(): List<StudentTask>
+  + setSkills(List<Skill>): void
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setTaskId(Integer): void
+  + getTaskId(): Integer
+  + setStudentTasks(List<StudentTask>): void
+  + getVisibility(): RecordVisibility
+  + getTitle(): String
+  + getDescription(): String
+  + setObjective(String): void
+  + getObjective(): String
+  + getTrainingplan(): TrainingPlan
+  + setTrainingplan(TrainingPlan): void
+}
+class TaskController << RestController >> {
+  - taskService: TaskService
+  + addTasks(TrainingPlanTaskDTO, UserPrincipal): ResponseEntity<String>
+  + getAllTasksByStudent(String, UserPrincipal): ResponseEntity<List<Task>>
+}
+interface TaskRepo << Repository>> {
+  + findByTitleAndTrainingplan(String, TrainingPlan): Task
+  + findByStudentTasks_Student_User_Email(String): List<Task>
+  + findByTrainingplan(TrainingPlan): List<Task>
+  + findByTrainingplan_Supervisor_User_EmailAndStudentTasks_Student_User_Email(String, String): List<Task>
+  + findByTitleAndTrainingplan_Trainingplanid(String, int): Task
+  + findByTrainingplan_Supervisor_User_Email(String): List<Task>
+}
+class TaskService << Service >> {
+  - skillRepo: SkillRepo
+  - trainingPlanRepo: TrainingPlanRepo
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - skillService: SkillService
+  - taskRepo: TaskRepo
+  - skillTrendRepo: SkillTrendRepo
+  - studentTaskRepo: StudentTaskRepo
+  + addTask(TrainingPlanTaskDTO, String): String
+  + getAllTasksByStudent(String, String, String): List<Task>
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+TaskController  -[#595959,dashed]->  Task
+TaskController  -[#595959,dashed]->  TaskService
+TaskController  -[#595959,dashed]->  UserPrincipal
+TaskRepo        -[#595959,dashed]->  Task
+TaskService     -[#595959,dashed]->  Task           : "«create»"
+TaskService     -[#595959,dashed]->  TaskRepo
+@enduml

@@ -1,0 +1,180 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Evaluation << Entity >> {
+  - supervisorRemark: String
+  - evalId: Integer
+  - supervisorgivenGrade: double
+  - ojtrecord: OjtRecord
+  - studentFeedback: String
+  - overallGrade: double
+  - visibility: RecordVisibility
+  - instructorgivenGrade: double
+  - instructorRemark: String
+  + getSupervisorRemark(): String
+  + getOjtrecord(): OjtRecord
+  + setSupervisorgivenGrade(double): void
+  + setOjtrecord(OjtRecord): void
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setEvalId(Integer): void
+  + setInstructorRemark(String): void
+  + getEvalId(): Integer
+  + setOverallGrade(double): void
+  + setVisibility(RecordVisibility): void
+  + setSupervisorRemark(String): void
+  + getInstructorRemark(): String
+  + getVisibility(): RecordVisibility
+  + getOverallGrade(): double
+  + getStudentFeedback(): String
+  + getInstructorgivenGrade(): double
+  + getSupervisorgivenGrade(): double
+  + setStudentFeedback(String): void
+  + setInstructorgivenGrade(double): void
+  + calculateTotalGrade(): void
+  + toString(): String
+}
+class EvaluationController << RestController >> {
+  - evaluationService: EvaluationService
+  + getEvaluationRecord(String, UserPrincipal): ResponseEntity<List<Evaluation>>
+  + addSupervisorFeedback(double, String, String, UserPrincipal): ResponseEntity<String>
+  + addInstructorFeedback(double, String, String, UserPrincipal): ResponseEntity<String>
+  + addStudentFeedback(String, UserPrincipal): ResponseEntity<Integer>
+}
+interface EvaluationRepo << Repository>> {
+  + findByOjtrecord_RecordNo(String): Evaluation
+  + findByOjtrecord(OjtRecord): Evaluation
+  + findByOjtrecord_Student_User_EmailAndOjtrecord_Supervisor_User_Email(String, String): Evaluation
+  + findByOjtrecord_Student_User_Email(String): Evaluation
+  + findByOjtrecord_Supervisor_User_Email(String): List<Evaluation>
+}
+class EvaluationService << Service >> {
+  - evaluationRepo: EvaluationRepo
+  - supervisorRepo: SupervisorRepo
+  - ojtRecordRepo: OjtRecordRepo
+  + addInstructorFeedback(String, double, String): String
+  + addSupervisorFeedback(String, double, String, String): String
+  + getEvaluationRecord(String, String, String): List<Evaluation>
+  + addStudentFeedback(String, String): int
+}
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + equals(Object): boolean
+  + getCompany(): Company
+  + setDepartment(String): void
+  + getStatus(): OJTStatus
+  + setRecordNo(String): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setStudent(Student): void
+  + getLogbookEntries(): List<LogbookEntry>
+  + setLogbookEntries(List<LogbookEntry>): void
+  + setOjtHours(double): void
+  + getVisibility(): RecordVisibility
+  + getStudent(): Student
+  + getRecordNo(): String
+  + getDesignation(): String
+  + getDepartment(): String
+  + getOjtHours(): double
+  + setCompany(Company): void
+  + setSupervisor(Supervisor): void
+  + getRenderedHours(): double
+  + setVisibility(RecordVisibility): void
+  + setRenderedHours(double): void
+  + setStatus(OJTStatus): void
+  + getSupervisor(): Supervisor
+  + setDesignation(String): void
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class Supervisor << Entity >> {
+  - company: Company
+  - ojtRecords: List<OjtRecord>
+  - userid: long
+  - position: String
+  - user: UserEntity
+  - work_address: String
+  - work_email: String
+  - work_contactNo: String
+  - trainingPlans: List<TrainingPlan>
+  + equals(Object): boolean
+  + getUser(): UserEntity
+  + setUserid(long): void
+  + getCompany(): Company
+  + getOjtRecords(): List<OjtRecord>
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setWork_contactNo(String): void
+  + setTrainingPlans(List<TrainingPlan>): void
+  + setWork_address(String): void
+  + setPosition(String): void
+  + setCompany(Company): void
+  + getUserid(): long
+  + getPosition(): String
+  + setUser(UserEntity): void
+  + getTrainingPlans(): List<TrainingPlan>
+  + setWork_email(String): void
+  + getWork_email(): String
+  + getWork_contactNo(): String
+  + setOjtRecords(List<OjtRecord>): void
+  + getWork_address(): String
+  + toString(): String
+}
+interface SupervisorRepo << Repository>> {
+  + findByUser_Email(String): Supervisor
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+Evaluation            -[#595959,dashed]->  OjtRecord
+EvaluationController  -[#595959,dashed]->  Evaluation
+EvaluationController  -[#595959,dashed]->  EvaluationService
+EvaluationController  -[#595959,dashed]->  UserPrincipal
+EvaluationRepo        -[#595959,dashed]->  Evaluation
+EvaluationRepo        -[#595959,dashed]->  OjtRecord
+EvaluationService     -[#595959,dashed]->  Evaluation           : "«create»"
+EvaluationService     -[#595959,dashed]->  EvaluationRepo
+EvaluationService     -[#595959,dashed]->  OjtRecord
+EvaluationService     -[#595959,dashed]->  OjtRecordRepo
+EvaluationService     -[#595959,dashed]->  Supervisor
+EvaluationService     -[#595959,dashed]->  SupervisorRepo
+OjtRecord             -[#595959,dashed]->  Supervisor
+OjtRecordRepo         -[#595959,dashed]->  OjtRecord
+OjtRecordRepo         -[#595959,dashed]->  Supervisor
+Supervisor            -[#595959,dashed]->  OjtRecord
+SupervisorRepo        -[#595959,dashed]->  Supervisor
+@enduml

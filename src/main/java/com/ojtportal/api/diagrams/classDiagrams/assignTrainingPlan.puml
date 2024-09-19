@@ -1,0 +1,208 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class AssignTrainingPlanDTO {
+  - internEmails: List<String>
+  - trainingPlanID: int
+  + getTrainingPlanID(): int
+  + getInternEmails(): List<String>
+  + setTrainingPlanID(int): void
+  + setInternEmails(List<String>): void
+}
+class EmailService << Service >> {
+  - javaMailSender: JavaMailSender
+  - sender: String
+  + sendSimpleMail(String, String, String): String
+}
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  # canEqual(Object): boolean
+  + getStatus(): OJTStatus
+  + getSupervisor(): Supervisor
+  + getLogbookEntries(): List<LogbookEntry>
+  + setRecordNo(String): void
+  + getStudent(): Student
+  + setStatus(OJTStatus): void
+  + equals(Object): boolean
+  + getCompany(): Company
+  + hashCode(): int
+  + setCompany(Company): void
+  + getRecordNo(): String
+  + setSupervisor(Supervisor): void
+  + setOjtHours(double): void
+  + setVisibility(RecordVisibility): void
+  + setStudent(Student): void
+  + setLogbookEntries(List<LogbookEntry>): void
+  + getDesignation(): String
+  + setDesignation(String): void
+  + getDepartment(): String
+  + getOjtHours(): double
+  + getVisibility(): RecordVisibility
+  + setDepartment(String): void
+  + getRenderedHours(): double
+  + setRenderedHours(double): void
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class StudentTask << Entity >> {
+  - student: Student
+  - status: TaskStatus
+  - id: Integer
+  - task: Task
+  + getId(): Integer
+  + getStudent(): Student
+  + getTask(): Task
+  + getStatus(): TaskStatus
+  + setId(Integer): void
+  + setStudent(Student): void
+  + setTask(Task): void
+  + setStatus(TaskStatus): void
+  + toString(): String
+}
+interface StudentTaskRepo << Repository>> {
+  + findByStudentAndTask(Student, Task): StudentTask
+  + findByStudent_User_Email(String): List<StudentTask>
+  + findByStudent(Student): List<StudentTask>
+  + findByTask(Task): List<StudentTask>
+}
+class StudentTrainingPlan << Entity >> {
+  - student: Student
+  - trainingPlan: TrainingPlan
+  - id: Integer
+  - completedTasks: int
+  # canEqual(Object): boolean
+  + equals(Object): boolean
+  + hashCode(): int
+  + toString(): String
+  + getId(): Integer
+  + setTrainingPlan(TrainingPlan): void
+  + getStudent(): Student
+  + getTrainingPlan(): TrainingPlan
+  + getCompletedTasks(): int
+  + setId(Integer): void
+  + setStudent(Student): void
+  + setCompletedTasks(int): void
+}
+interface StudentTrainingPlanRepo << Repository>> {
+  + findByStudentAndTrainingPlan(Student, TrainingPlan): StudentTrainingPlan
+  + findByTrainingPlan(TrainingPlan): List<StudentTrainingPlan>
+  + findByStudent(Student): List<StudentTrainingPlan>
+}
+class Supervisor << Entity >> {
+  - company: Company
+  - ojtRecords: List<OjtRecord>
+  - userid: long
+  - position: String
+  - user: UserEntity
+  - work_address: String
+  - work_email: String
+  - work_contactNo: String
+  - trainingPlans: List<TrainingPlan>
+  + equals(Object): boolean
+  + getTrainingPlans(): List<TrainingPlan>
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setUserid(long): void
+  + getUserid(): long
+  + getOjtRecords(): List<OjtRecord>
+  + getPosition(): String
+  + setTrainingPlans(List<TrainingPlan>): void
+  + setPosition(String): void
+  + getWork_email(): String
+  + setOjtRecords(List<OjtRecord>): void
+  + getCompany(): Company
+  + setCompany(Company): void
+  + getWork_contactNo(): String
+  + getUser(): UserEntity
+  + setUser(UserEntity): void
+  + setWork_contactNo(String): void
+  + setWork_address(String): void
+  + getWork_address(): String
+  + setWork_email(String): void
+  + toString(): String
+}
+interface SupervisorRepo << Repository>> {
+  + findByUser_Email(String): Supervisor
+}
+class TrainingPlanController << RestController >> {
+  - trainingPlanService: TrainingPlanService
+  + getAllTrainingPlansByStudent(String, UserPrincipal): ResponseEntity<List<TrainingPlan>>
+  + addTrainingPlan(TrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+  + updateTrainingPlan(TrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+  + assignTrainingPlan(AssignTrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+}
+class TrainingPlanService << Service >> {
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - emailService: EmailService
+  - trainingPlanRepo: TrainingPlanRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - supervisorRepo: SupervisorRepo
+  - studentTaskRepo: StudentTaskRepo
+  + assignTrainingPlan(AssignTrainingPlanDTO, String): String
+  + getAllTrainingPlanBySupervisor(String): List<TrainingPlan>
+  + getTrainingPlansBySupervisor(String): List<TrainingPlan>
+  + getAllTrainingPlansByStudent(String): String
+  + getTrainingPlansByStudent(String, String, String): List<TrainingPlan>
+  + updateTrainingPlan(TrainingPlanDTO, String): String
+  + getAllTrainingPlansListByStudent(String): List<TrainingPlan>
+  - sendAssignmentEmails(List<String>, Supervisor, TrainingPlan): void
+  - sendTrainingPlanUpdateNotification(List<String>, Supervisor, TrainingPlan): void
+  + addTrainingPlan(TrainingPlanDTO, String): String
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+OjtRecord                -[#595959,dashed]->  Supervisor
+OjtRecordRepo            -[#595959,dashed]->  OjtRecord
+OjtRecordRepo            -[#595959,dashed]->  Supervisor
+StudentTaskRepo          -[#595959,dashed]->  StudentTask
+StudentTrainingPlanRepo  -[#595959,dashed]->  StudentTrainingPlan
+Supervisor               -[#595959,dashed]->  OjtRecord
+SupervisorRepo           -[#595959,dashed]->  Supervisor
+TrainingPlanController   -[#595959,dashed]->  AssignTrainingPlanDTO
+TrainingPlanController   -[#595959,dashed]->  TrainingPlanService
+TrainingPlanController   -[#595959,dashed]->  UserPrincipal
+TrainingPlanService      -[#595959,dashed]->  AssignTrainingPlanDTO
+TrainingPlanService      -[#595959,dashed]->  EmailService
+TrainingPlanService      -[#595959,dashed]->  OjtRecord
+TrainingPlanService      -[#595959,dashed]->  OjtRecordRepo
+TrainingPlanService      -[#595959,dashed]->  StudentTask             : "«create»"
+TrainingPlanService      -[#595959,dashed]->  StudentTaskRepo
+TrainingPlanService      -[#595959,dashed]->  StudentTrainingPlan     : "«create»"
+TrainingPlanService      -[#595959,dashed]->  StudentTrainingPlanRepo
+TrainingPlanService      -[#595959,dashed]->  Supervisor
+TrainingPlanService      -[#595959,dashed]->  SupervisorRepo
+@enduml

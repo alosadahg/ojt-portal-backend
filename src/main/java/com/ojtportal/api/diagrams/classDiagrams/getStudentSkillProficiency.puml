@@ -1,0 +1,113 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + setRenderedHours(double): void
+  + equals(Object): boolean
+  + setOjtHours(double): void
+  # canEqual(Object): boolean
+  + setStudent(Student): void
+  + getCompany(): Company
+  + getStudent(): Student
+  + setSupervisor(Supervisor): void
+  + getStatus(): OJTStatus
+  + setStatus(OJTStatus): void
+  + setCompany(Company): void
+  + setLogbookEntries(List<LogbookEntry>): void
+  + setDepartment(String): void
+  + getLogbookEntries(): List<LogbookEntry>
+  + setDesignation(String): void
+  + getVisibility(): RecordVisibility
+  + hashCode(): int
+  + getRecordNo(): String
+  + getDesignation(): String
+  + getDepartment(): String
+  + getSupervisor(): Supervisor
+  + getOjtHours(): double
+  + getRenderedHours(): double
+  + setVisibility(RecordVisibility): void
+  + setRecordNo(String): void
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class StudentSkillProficiency << Entity >> {
+  - student: Student
+  - visibility: RecordVisibility
+  - skill: Skill
+  - id: Integer
+  - frequencyOfUse: int
+  + setSkill(Skill): void
+  + equals(Object): boolean
+  + setId(Integer): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getId(): Integer
+  + getFrequencyOfUse(): int
+  + setFrequencyOfUse(int): void
+  + setStudent(Student): void
+  + getVisibility(): RecordVisibility
+  + getStudent(): Student
+  + getSkill(): Skill
+  + setVisibility(RecordVisibility): void
+  + toString(): String
+}
+class StudentSkillProficiencyController << RestController >> {
+  - studentSkillProficiencyService: StudentSkillProficiencyService
+  + getStudentProficiency(String, UserPrincipal): ResponseEntity<String>
+}
+interface StudentSkillProficiencyRepo << Repository>> {
+  + findBySkillAndStudent(Skill, Student): StudentSkillProficiency
+  + findByStudent(Student): List<StudentSkillProficiency>
+}
+class StudentSkillProficiencyService << Service >> {
+  - studentSkillProficiencyRepo: StudentSkillProficiencyRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - studentRepo: StudentRepo
+  + getStudentProficiency(String, String, String): String
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+OjtRecordRepo                      -[#595959,dashed]->  OjtRecord
+StudentSkillProficiencyController  -[#595959,dashed]->  StudentSkillProficiencyService
+StudentSkillProficiencyController  -[#595959,dashed]->  UserPrincipal
+StudentSkillProficiencyRepo        -[#595959,dashed]->  StudentSkillProficiency
+StudentSkillProficiencyService     -[#595959,dashed]->  OjtRecord
+StudentSkillProficiencyService     -[#595959,dashed]->  OjtRecordRepo
+StudentSkillProficiencyService     -[#595959,dashed]->  StudentSkillProficiency
+StudentSkillProficiencyService     -[#595959,dashed]->  StudentSkillProficiencyRepo
+@enduml

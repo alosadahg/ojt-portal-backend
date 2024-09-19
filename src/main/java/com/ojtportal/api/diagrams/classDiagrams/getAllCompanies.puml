@@ -1,0 +1,127 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Company << Entity >> {
+  - companyName: String
+  - id: Integer
+  - ojtRecords: List<OjtRecord>
+  - emails: List<String>
+  - locations: List<String>
+  - contactNos: List<String>
+  - supervisors: List<Supervisor>
+  + getSupervisors(): List<Supervisor>
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setCompanyName(String): void
+  + getId(): Integer
+  + getCompanyName(): String
+  + setId(Integer): void
+  + getOjtRecords(): List<OjtRecord>
+  + setEmails(List<String>): void
+  + getContactNos(): List<String>
+  + builder(): CompanyBuilder
+  + setContactNos(List<String>): void
+  - $default$locations(): List<String>
+  + getEmails(): List<String>
+  - $default$emails(): List<String>
+  + setSupervisors(List<Supervisor>): void
+  - $default$contactNos(): List<String>
+  + setLocations(List<String>): void
+  + getLocations(): List<String>
+  + setOjtRecords(List<OjtRecord>): void
+  + toString(): String
+}
+class CompanyController << RestController >> {
+  - supervisorRepo: SupervisorRepo
+  - companyService: CompanyService
+  + getAllCompanies(UserPrincipal): ResponseEntity<List<Company>>
+  + getStudentsByCompany(String, UserPrincipal): ResponseEntity<List<Student>>
+  + addCompanyFullInfo(String, String, String, String): ResponseEntity<Integer>
+}
+class CompanyService << Service >> {
+  - ojtRecordRepo: OjtRecordRepo
+  - companyRepo: CompanyRepo
+  + addCompany(String, String, String, String): int
+  + getSupervisorsByCompany(String): List<Supervisor>
+  + addSupervisor(String, Supervisor): int
+  + getAllCompanies(String, String): List<Company>
+  + getStudentsByCompany(String): List<Student>
+  + addCompany(String): int
+}
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setCompany(Company): void
+  + setSupervisor(Supervisor): void
+  + setLogbookEntries(List<LogbookEntry>): void
+  + setRecordNo(String): void
+  + setVisibility(RecordVisibility): void
+  + equals(Object): boolean
+  + getRecordNo(): String
+  + getDesignation(): String
+  + getStudent(): Student
+  + getCompany(): Company
+  + getLogbookEntries(): List<LogbookEntry>
+  + getDepartment(): String
+  + setStatus(OJTStatus): void
+  + setStudent(Student): void
+  + getVisibility(): RecordVisibility
+  + setDepartment(String): void
+  + getOjtHours(): double
+  + getStatus(): OJTStatus
+  + getRenderedHours(): double
+  + getSupervisor(): Supervisor
+  + setOjtHours(double): void
+  + setRenderedHours(double): void
+  + setDesignation(String): void
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+Company            -[#595959,dashed]->  OjtRecord
+CompanyController  -[#595959,dashed]->  Company
+CompanyController  -[#595959,dashed]->  CompanyService
+CompanyController  -[#595959,dashed]->  UserPrincipal
+CompanyService     -[#595959,dashed]->  Company           : "«create»"
+CompanyService     -[#595959,dashed]->  OjtRecord
+CompanyService     -[#595959,dashed]->  OjtRecordRepo
+OjtRecord          -[#595959,dashed]->  Company
+OjtRecordRepo      -[#595959,dashed]->  OjtRecord
+@enduml

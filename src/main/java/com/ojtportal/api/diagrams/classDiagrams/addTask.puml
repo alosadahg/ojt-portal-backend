@@ -1,0 +1,239 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Skill << Entity >> {
+  - skillName: String
+  - domain: String
+  - skillId: Integer
+  - studentSkillFrequencies: List<StudentSkillProficiency>
+  - visibility: RecordVisibility
+  - tasks: List<Task>
+  ~ logbookEntries: List<LogbookEntry>
+  # canEqual(Object): boolean
+  + setVisibility(RecordVisibility): void
+  + setLogbookEntries(List<LogbookEntry>): void
+  + setSkillName(String): void
+  + setSkillId(Integer): void
+  + setStudentSkillFrequencies(List<StudentSkillProficiency>): void
+  + equals(Object): boolean
+  + hashCode(): int
+  + getSkillId(): Integer
+  + setDomain(String): void
+  + getSkillName(): String
+  + getDomain(): String
+  + getVisibility(): RecordVisibility
+  + getTasks(): List<Task>
+  + getLogbookEntries(): List<LogbookEntry>
+  + getStudentSkillFrequencies(): List<StudentSkillProficiency>
+  + setTasks(List<Task>): void
+  + toString(): String
+}
+interface SkillRepo << Repository>> {
+  + findBySkillNameAndDomain(String, String): Skill
+}
+class SkillTrend << Entity >> {
+  - skillId: Integer
+  - trend: String
+  - skill: Skill
+  - demandChange: double
+  - skillFrequency: int
+  - visibility: RecordVisibility
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + setTrend(String): void
+  + hashCode(): int
+  + getSkillId(): Integer
+  + getSkill(): Skill
+  + setVisibility(RecordVisibility): void
+  + getDemandChange(): double
+  + setSkillFrequency(int): void
+  + setSkill(Skill): void
+  + getTrend(): String
+  + setDemandChange(double): void
+  + getSkillFrequency(): int
+  + setSkillId(Integer): void
+  + getVisibility(): RecordVisibility
+  + toString(): String
+}
+interface SkillTrendRepo << Repository>> {
+  + findBySkill(Skill): SkillTrend
+  + findBySkill_SkillName(String): SkillTrend
+}
+class StudentTask << Entity >> {
+  - student: Student
+  - status: TaskStatus
+  - id: Integer
+  - task: Task
+  + getId(): Integer
+  + getStudent(): Student
+  + getTask(): Task
+  + getStatus(): TaskStatus
+  + setId(Integer): void
+  + setStudent(Student): void
+  + setTask(Task): void
+  + setStatus(TaskStatus): void
+  + toString(): String
+}
+interface StudentTaskRepo << Repository>> {
+  + findByStudentAndTask(Student, Task): StudentTask
+  + findByStudent_User_Email(String): List<StudentTask>
+  + findByStudent(Student): List<StudentTask>
+  + findByTask(Task): List<StudentTask>
+}
+class Task << Entity >> {
+  ~ skills: List<Skill>
+  - taskId: Integer
+  - visibility: RecordVisibility
+  - trainingplan: TrainingPlan
+  - description: String
+  - objective: String
+  - title: String
+  - studentTasks: List<StudentTask>
+  + getTaskId(): Integer
+  + toString(): String
+  + getVisibility(): RecordVisibility
+  + getTrainingplan(): TrainingPlan
+  + setDescription(String): void
+  + getSkills(): List<Skill>
+  + setTaskId(Integer): void
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + getStudentTasks(): List<StudentTask>
+  + setSkills(List<Skill>): void
+  + hashCode(): int
+  + setVisibility(RecordVisibility): void
+  + setTrainingplan(TrainingPlan): void
+  + getTitle(): String
+  + setTitle(String): void
+  + setStudentTasks(List<StudentTask>): void
+  + getDescription(): String
+  + getObjective(): String
+  + setObjective(String): void
+}
+class TaskController << RestController >> {
+  - taskService: TaskService
+  + addTasks(TrainingPlanTaskDTO, UserPrincipal): ResponseEntity<String>
+  + getAllTasksByStudent(String, UserPrincipal): ResponseEntity<List<Task>>
+}
+interface TaskRepo << Repository>> {
+  + findByTitleAndTrainingplan(String, TrainingPlan): Task
+  + findByStudentTasks_Student_User_Email(String): List<Task>
+  + findByTrainingplan(TrainingPlan): List<Task>
+  + findByTrainingplan_Supervisor_User_EmailAndStudentTasks_Student_User_Email(String, String): List<Task>
+  + findByTitleAndTrainingplan_Trainingplanid(String, int): Task
+  + findByTrainingplan_Supervisor_User_Email(String): List<Task>
+}
+class TaskService << Service >> {
+  - skillRepo: SkillRepo
+  - trainingPlanRepo: TrainingPlanRepo
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - skillService: SkillService
+  - taskRepo: TaskRepo
+  - skillTrendRepo: SkillTrendRepo
+  - studentTaskRepo: StudentTaskRepo
+  + addTask(TrainingPlanTaskDTO, String): String
+  + getAllTasksByStudent(String, String, String): List<Task>
+}
+class TrainingPlan << Entity >> {
+  - trainingplanid: Integer
+  - description: String
+  - endDate: LocalDate
+  - studentTrainingPlans: List<StudentTrainingPlan>
+  - startDate: LocalDate
+  - title: String
+  - visibility: RecordVisibility
+  - supervisor: Supervisor
+  - totalTasks: int
+  - tasks: List<Task>
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getTrainingplanid(): Integer
+  + setTasks(List<Task>): void
+  + getTitle(): String
+  + setSupervisor(Supervisor): void
+  + getTotalTasks(): int
+  + setStartDate(LocalDate): void
+  + getDescription(): String
+  + getVisibility(): RecordVisibility
+  + setTotalTasks(int): void
+  + setTrainingplanid(Integer): void
+  + setDescription(String): void
+  + getStartDate(): LocalDate
+  + getTasks(): List<Task>
+  + setTitle(String): void
+  + setEndDate(LocalDate): void
+  + setVisibility(RecordVisibility): void
+  + setStudentTrainingPlans(List<StudentTrainingPlan>): void
+  + getStudentTrainingPlans(): List<StudentTrainingPlan>
+  + getEndDate(): LocalDate
+  + getSupervisor(): Supervisor
+  + toString(): String
+}
+interface TrainingPlanRepo << Repository>> {
+  + findByTitleAndSupervisor(String, Supervisor): TrainingPlan
+  + findBySupervisor_User_Email(String): List<TrainingPlan>
+  + findByTitle(String): TrainingPlan
+  + findBySupervisor_User_EmailAndStudentTrainingPlans_Student_User_Email(String, String): List<TrainingPlan>
+  + findByStudentTrainingPlans_Student_User_Email(String): List<TrainingPlan>
+}
+class TrainingPlanTaskDTO {
+  - trainingPlanID: int
+  - task: TaskDTO
+  - skills: List<SkillDTO>
+  + getTrainingPlanID(): int
+  + getTask(): TaskDTO
+  + getSkills(): List<SkillDTO>
+  + setTrainingPlanID(int): void
+  + setTask(TaskDTO): void
+  + setSkills(List<SkillDTO>): void
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+Skill                -[#595959,dashed]->  Task
+SkillRepo            -[#595959,dashed]->  Skill
+SkillTrend           -[#595959,dashed]->  Skill
+SkillTrendRepo       -[#595959,dashed]->  Skill
+SkillTrendRepo       -[#595959,dashed]->  SkillTrend
+StudentTask          -[#595959,dashed]->  Task
+StudentTaskRepo      -[#595959,dashed]->  StudentTask
+StudentTaskRepo      -[#595959,dashed]->  Task
+Task                 -[#595959,dashed]->  Skill
+Task                 -[#595959,dashed]->  StudentTask
+Task                 -[#595959,dashed]->  TrainingPlan
+TaskController       -[#595959,dashed]->  Task
+TaskController       -[#595959,dashed]->  TaskService
+TaskController       -[#595959,dashed]->  TrainingPlanTaskDTO
+TaskController       -[#595959,dashed]->  UserPrincipal
+TaskRepo             -[#595959,dashed]->  Task
+TaskRepo             -[#595959,dashed]->  TrainingPlan
+TaskService          -[#595959,dashed]->  Skill
+TaskService          -[#595959,dashed]->  SkillRepo
+TaskService          -[#595959,dashed]->  SkillTrend
+TaskService          -[#595959,dashed]->  SkillTrendRepo
+TaskService          -[#595959,dashed]->  StudentTask         : "«create»"
+TaskService          -[#595959,dashed]->  StudentTaskRepo
+TaskService          -[#595959,dashed]->  Task                : "«create»"
+TaskService          -[#595959,dashed]->  TaskRepo
+TaskService          -[#595959,dashed]->  TrainingPlan
+TaskService          -[#595959,dashed]->  TrainingPlanRepo
+TaskService          -[#595959,dashed]->  TrainingPlanTaskDTO
+TrainingPlan         -[#595959,dashed]->  Task
+TrainingPlanRepo     -[#595959,dashed]->  TrainingPlan
+@enduml

@@ -1,0 +1,122 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class CompanyController << RestController >> {
+  - supervisorRepo: SupervisorRepo
+  - companyService: CompanyService
+  + getAllCompanies(UserPrincipal): ResponseEntity<List<Company>>
+  + getStudentsByCompany(String, UserPrincipal): ResponseEntity<List<Student>>
+  + addCompanyFullInfo(String, String, String, String): ResponseEntity<Integer>
+}
+class CompanyService << Service >> {
+  - ojtRecordRepo: OjtRecordRepo
+  - companyRepo: CompanyRepo
+  + addCompany(String, String, String, String): int
+  + getSupervisorsByCompany(String): List<Supervisor>
+  + addSupervisor(String, Supervisor): int
+  + getAllCompanies(String, String): List<Company>
+  + getStudentsByCompany(String): List<Student>
+  + addCompany(String): int
+}
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + getOjtHours(): double
+  + setSupervisor(Supervisor): void
+  + getSupervisor(): Supervisor
+  + setDesignation(String): void
+  + setRenderedHours(double): void
+  + setVisibility(RecordVisibility): void
+  + setStatus(OJTStatus): void
+  + equals(Object): boolean
+  + setCompany(Company): void
+  # canEqual(Object): boolean
+  + getCompany(): Company
+  + setStudent(Student): void
+  + getVisibility(): RecordVisibility
+  + hashCode(): int
+  + getRecordNo(): String
+  + setOjtHours(double): void
+  + setDepartment(String): void
+  + getStudent(): Student
+  + getDesignation(): String
+  + getDepartment(): String
+  + getLogbookEntries(): List<LogbookEntry>
+  + setRecordNo(String): void
+  + getRenderedHours(): double
+  + getStatus(): OJTStatus
+  + setLogbookEntries(List<LogbookEntry>): void
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class Student << Entity >> {
+  - degreeProgram: String
+  - skillFrequencies: List<StudentSkillProficiency>
+  - studentTasks: List<StudentTask>
+  - ojtRecord: OjtRecord
+  - studentid: String
+  - userid: long
+  - user: UserEntity
+  + setUserid(long): void
+  + setStudentid(String): void
+  + getUserid(): long
+  + getStudentid(): String
+  + setUser(UserEntity): void
+  + getDegreeProgram(): String
+  + getUser(): UserEntity
+  + setSkillFrequencies(List<StudentSkillProficiency>): void
+  + getOjtRecord(): OjtRecord
+  + setStudentTasks(List<StudentTask>): void
+  + setDegreeProgram(String): void
+  + getSkillFrequencies(): List<StudentSkillProficiency>
+  + getStudentTasks(): List<StudentTask>
+  + setOjtRecord(OjtRecord): void
+  + hashCode(): int
+  + toString(): String
+  + equals(Object): boolean
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+CompanyController  -[#595959,dashed]->  CompanyService
+CompanyController  -[#595959,dashed]->  Student
+CompanyController  -[#595959,dashed]->  UserPrincipal
+CompanyService     -[#595959,dashed]->  OjtRecord
+CompanyService     -[#595959,dashed]->  OjtRecordRepo
+CompanyService     -[#595959,dashed]->  Student
+OjtRecord          -[#595959,dashed]->  Student
+OjtRecordRepo      -[#595959,dashed]->  OjtRecord
+Student            -[#595959,dashed]->  OjtRecord
+@enduml

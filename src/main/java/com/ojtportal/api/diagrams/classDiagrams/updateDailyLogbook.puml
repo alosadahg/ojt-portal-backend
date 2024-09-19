@@ -1,0 +1,259 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class LogbookController << RestController >> {
+  - logbookService: LogbookService
+  + getAllEntries(String, UserPrincipal): ResponseEntity<List<LogbookEntry>>
+  + approveLogbook(int, String, UserPrincipal): ResponseEntity<String>
+  + rejectLogbook(int, String, UserPrincipal): ResponseEntity<String>
+  + updateLogbookEntry(LogbookEntryDTO, UserPrincipal): ResponseEntity<String>
+  + addLogbookEntry(LogbookEntryDTO, UserPrincipal): ResponseEntity<String>
+  + getSupervisorLogbooks(String, UserPrincipal): ResponseEntity<List<LogbookEntry>>
+}
+class LogbookEntry << Entity >> {
+  - remarks: String
+  - totalHrs: double
+  - timeout: LocalDateTime
+  - visibility: RecordVisibility
+  - ojtrecord: OjtRecord
+  - activities: String
+  - status: LogbookStatus
+  - timein: LocalDateTime
+  - entryId: Integer
+  - tasks: List<Task>
+  - skills: List<Skill>
+  # canEqual(Object): boolean
+  + setTasks(List<Task>): void
+  + setRemarks(String): void
+  + setVisibility(RecordVisibility): void
+  + getTasks(): List<Task>
+  + getRemarks(): String
+  + getVisibility(): RecordVisibility
+  + setEntryId(Integer): void
+  + setStatus(LogbookStatus): void
+  + equals(Object): boolean
+  + hashCode(): int
+  + getEntryId(): Integer
+  + getStatus(): LogbookStatus
+  + getTimein(): LocalDateTime
+  + setTotalHrs(double): void
+  + getSkills(): List<Skill>
+  + setActivities(String): void
+  + setSkills(List<Skill>): void
+  + setTimeout(LocalDateTime): void
+  + getTimeout(): LocalDateTime
+  + getTotalHrs(): double
+  + setTimein(LocalDateTime): void
+  + setOjtrecord(OjtRecord): void
+  + getOjtrecord(): OjtRecord
+  + getActivities(): String
+  - getHoursRendered(LocalDateTime, LocalDateTime): double
+  + toString(): String
+}
+interface LogbookEntryRepo << Repository>> {
+  + findByOjtrecord_Supervisor_User_Email(String): List<LogbookEntry>
+  + findByOjtrecord_RecordNo(String): List<LogbookEntry>
+  + findByOjtrecord_Student_User_Email(String): List<LogbookEntry>
+  + findByTimein(LocalDateTime): LogbookEntry
+}
+class Skill << Entity >> {
+  - skillName: String
+  - domain: String
+  - skillId: Integer
+  - studentSkillFrequencies: List<StudentSkillProficiency>
+  - visibility: RecordVisibility
+  - tasks: List<Task>
+  ~ logbookEntries: List<LogbookEntry>
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setDomain(String): void
+  + getSkillId(): Integer
+  + setLogbookEntries(List<LogbookEntry>): void
+  + getTasks(): List<Task>
+  + setVisibility(RecordVisibility): void
+  + getSkillName(): String
+  + getDomain(): String
+  + setStudentSkillFrequencies(List<StudentSkillProficiency>): void
+  + getVisibility(): RecordVisibility
+  + getStudentSkillFrequencies(): List<StudentSkillProficiency>
+  + setTasks(List<Task>): void
+  + getLogbookEntries(): List<LogbookEntry>
+  + setSkillId(Integer): void
+  + setSkillName(String): void
+  + toString(): String
+}
+interface SkillRepo << Repository>> {
+  + findBySkillNameAndDomain(String, String): Skill
+}
+class SkillTrend << Entity >> {
+  - skillId: Integer
+  - trend: String
+  - skill: Skill
+  - demandChange: double
+  - skillFrequency: int
+  - visibility: RecordVisibility
+  + hashCode(): int
+  + setTrend(String): void
+  + setVisibility(RecordVisibility): void
+  + setDemandChange(double): void
+  + equals(Object): boolean
+  + setSkillId(Integer): void
+  + setSkill(Skill): void
+  # canEqual(Object): boolean
+  + getSkillId(): Integer
+  + getDemandChange(): double
+  + getSkill(): Skill
+  + getTrend(): String
+  + getSkillFrequency(): int
+  + setSkillFrequency(int): void
+  + getVisibility(): RecordVisibility
+  + toString(): String
+}
+interface SkillTrendRepo << Repository>> {
+  + findBySkill(Skill): SkillTrend
+  + findBySkill_SkillName(String): SkillTrend
+}
+class Student << Entity >> {
+  - degreeProgram: String
+  - skillFrequencies: List<StudentSkillProficiency>
+  - studentTasks: List<StudentTask>
+  - ojtRecord: OjtRecord
+  - studentid: String
+  - userid: long
+  - user: UserEntity
+  + getUserid(): long
+  + getStudentid(): String
+  + setStudentid(String): void
+  + setUser(UserEntity): void
+  + getDegreeProgram(): String
+  + getUser(): UserEntity
+  + setSkillFrequencies(List<StudentSkillProficiency>): void
+  + setStudentTasks(List<StudentTask>): void
+  + getOjtRecord(): OjtRecord
+  + getSkillFrequencies(): List<StudentSkillProficiency>
+  + setOjtRecord(OjtRecord): void
+  + setUserid(long): void
+  + getStudentTasks(): List<StudentTask>
+  + setDegreeProgram(String): void
+  + hashCode(): int
+  + toString(): String
+  + equals(Object): boolean
+}
+interface StudentRepo << Repository>> {
+  + findByUser_Email(String): Student
+  + findByStudentid(String): Student
+  + findByStudentidAndUserid(String, Long): Student
+}
+class StudentSkillProficiency << Entity >> {
+  - student: Student
+  - visibility: RecordVisibility
+  - skill: Skill
+  - id: Integer
+  - frequencyOfUse: int
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getId(): Integer
+  + setFrequencyOfUse(int): void
+  + getFrequencyOfUse(): int
+  + setSkill(Skill): void
+  + setId(Integer): void
+  + getVisibility(): RecordVisibility
+  + getStudent(): Student
+  + getSkill(): Skill
+  + setVisibility(RecordVisibility): void
+  + setStudent(Student): void
+  + toString(): String
+}
+interface StudentSkillProficiencyRepo << Repository>> {
+  + findBySkillAndStudent(Skill, Student): StudentSkillProficiency
+  + findByStudent(Student): List<StudentSkillProficiency>
+}
+class StudentTask << Entity >> {
+  - student: Student
+  - status: TaskStatus
+  - id: Integer
+  - task: Task
+  + getId(): Integer
+  + getStudent(): Student
+  + getTask(): Task
+  + getStatus(): TaskStatus
+  + setId(Integer): void
+  + setStudent(Student): void
+  + setTask(Task): void
+  + setStatus(TaskStatus): void
+  + toString(): String
+}
+interface StudentTaskRepo << Repository>> {
+  + findByStudentAndTask(Student, Task): StudentTask
+  + findByStudent_User_Email(String): List<StudentTask>
+  + findByStudent(Student): List<StudentTask>
+  + findByTask(Task): List<StudentTask>
+}
+class StudentTrainingPlan << Entity >> {
+  - student: Student
+  - trainingPlan: TrainingPlan
+  - id: Integer
+  - completedTasks: int
+  # canEqual(Object): boolean
+  + setCompletedTasks(int): void
+  + setTrainingPlan(TrainingPlan): void
+  + equals(Object): boolean
+  + hashCode(): int
+  + toString(): String
+  + getId(): Integer
+  + getStudent(): Student
+  + getTrainingPlan(): TrainingPlan
+  + getCompletedTasks(): int
+  + setId(Integer): void
+  + setStudent(Student): void
+}
+interface StudentTrainingPlanRepo << Repository>> {
+  + findByStudentAndTrainingPlan(Student, TrainingPlan): StudentTrainingPlan
+  + findByTrainingPlan(TrainingPlan): List<StudentTrainingPlan>
+  + findByStudent(Student): List<StudentTrainingPlan>
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+LogbookController            -[#595959,dashed]->  LogbookEntry
+LogbookController            -[#595959,dashed]->  UserPrincipal
+LogbookEntry                 -[#595959,dashed]->  Skill
+LogbookEntryRepo             -[#595959,dashed]->  LogbookEntry
+Skill                        -[#595959,dashed]->  LogbookEntry
+Skill                        -[#595959,dashed]->  StudentSkillProficiency
+SkillRepo                    -[#595959,dashed]->  Skill
+SkillTrend                   -[#595959,dashed]->  Skill
+SkillTrendRepo               -[#595959,dashed]->  Skill
+SkillTrendRepo               -[#595959,dashed]->  SkillTrend
+Student                      -[#595959,dashed]->  StudentSkillProficiency
+Student                      -[#595959,dashed]->  StudentTask
+StudentRepo                  -[#595959,dashed]->  Student
+StudentSkillProficiency      -[#595959,dashed]->  Skill
+StudentSkillProficiency      -[#595959,dashed]->  Student
+StudentSkillProficiencyRepo  -[#595959,dashed]->  Skill
+StudentSkillProficiencyRepo  -[#595959,dashed]->  Student
+StudentSkillProficiencyRepo  -[#595959,dashed]->  StudentSkillProficiency
+StudentTask                  -[#595959,dashed]->  Student
+StudentTaskRepo              -[#595959,dashed]->  Student
+StudentTaskRepo              -[#595959,dashed]->  StudentTask
+StudentTrainingPlan          -[#595959,dashed]->  Student
+StudentTrainingPlanRepo      -[#595959,dashed]->  Student
+StudentTrainingPlanRepo      -[#595959,dashed]->  StudentTrainingPlan
+@enduml

@@ -1,0 +1,99 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class OjtAnalyticsController << RestController >> {
+  - skillTrendService: SkillTrendService
+  - getSkillTrend(SkillTrendInputDTO): ResponseEntity<SkillTrendResponseDTO>
+  - getTrendSummary(): ResponseEntity<List<SkillTrend>>
+}
+class SkillResponseDTO {
+  - demandChange: double
+  - skillFrequency: double
+  - year: int
+  + getDemandChange(): double
+  + getSkillFrequency(): double
+  + getYear(): int
+  + setDemandChange(double): void
+  + setSkillFrequency(double): void
+  + setYear(int): void
+  + toString(): String
+}
+class SkillTrend << Entity >> {
+  - skillId: Integer
+  - trend: String
+  - skill: Skill
+  - demandChange: double
+  - skillFrequency: int
+  - visibility: RecordVisibility
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + setSkillId(Integer): void
+  + setSkill(Skill): void
+  + getSkill(): Skill
+  + setTrend(String): void
+  + hashCode(): int
+  + getSkillId(): Integer
+  + setVisibility(RecordVisibility): void
+  + getDemandChange(): double
+  + getTrend(): String
+  + setSkillFrequency(int): void
+  + getSkillFrequency(): int
+  + getVisibility(): RecordVisibility
+  + setDemandChange(double): void
+  + toString(): String
+}
+class SkillTrendInputDTO {
+  - skill: String
+  - startDate: String
+  - endDate: String
+  + getSkill(): String
+  + getStartDate(): String
+  + getEndDate(): String
+  + setSkill(String): void
+  + setStartDate(String): void
+  + setEndDate(String): void
+  + toString(): String
+}
+interface SkillTrendRepo << Repository>> {
+  + findBySkill(Skill): SkillTrend
+  + findBySkill_SkillName(String): SkillTrend
+}
+class SkillTrendResponseDTO {
+  - skill: String
+  - trend: String
+  - avgDemandChange: double
+  - startDate: LocalDate
+  - endDate: LocalDate
+  - yearlyData: List<SkillResponseDTO>
+  + getEndDate(): LocalDate
+  + setTrend(String): void
+  + getSkill(): String
+  + getStartDate(): LocalDate
+  + getAvgDemandChange(): double
+  + setYearlyData(List<SkillResponseDTO>): void
+  + getTrend(): String
+  + getYearlyData(): List<SkillResponseDTO>
+  + setSkill(String): void
+  + setStartDate(LocalDate): void
+  + setEndDate(LocalDate): void
+  + setAvgDemandChange(double): void
+  + toString(): String
+}
+class SkillTrendService << Service >> {
+  - skillTrendRepo: SkillTrendRepo
+  + getLogbookTrend(): List<SkillTrend>
+  + getGlobalSkillTrend(SkillTrendInputDTO): SkillTrendResponseDTO
+}
+
+OjtAnalyticsController  -[#595959,dashed]->  SkillTrend
+OjtAnalyticsController  -[#595959,dashed]->  SkillTrendInputDTO
+OjtAnalyticsController  -[#595959,dashed]->  SkillTrendResponseDTO
+OjtAnalyticsController  -[#595959,dashed]->  SkillTrendService
+SkillTrendRepo          -[#595959,dashed]->  SkillTrend
+SkillTrendResponseDTO   -[#595959,dashed]->  SkillResponseDTO
+SkillTrendService       -[#595959,dashed]->  SkillTrend
+SkillTrendService       -[#595959,dashed]->  SkillTrendInputDTO
+SkillTrendService       -[#595959,dashed]->  SkillTrendRepo
+SkillTrendService       -[#595959,dashed]->  SkillTrendResponseDTO
+@enduml

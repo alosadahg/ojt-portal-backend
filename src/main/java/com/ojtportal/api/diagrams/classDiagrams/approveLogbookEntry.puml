@@ -1,0 +1,190 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class EmailService << Service >> {
+  - javaMailSender: JavaMailSender
+  - sender: String
+  + sendSimpleMail(String, String, String): String
+}
+class LogbookController << RestController >> {
+  - logbookService: LogbookService
+  + getAllEntries(String, UserPrincipal): ResponseEntity<List<LogbookEntry>>
+  + approveLogbook(int, String, UserPrincipal): ResponseEntity<String>
+  + rejectLogbook(int, String, UserPrincipal): ResponseEntity<String>
+  + updateLogbookEntry(LogbookEntryDTO, UserPrincipal): ResponseEntity<String>
+  + addLogbookEntry(LogbookEntryDTO, UserPrincipal): ResponseEntity<String>
+  + getSupervisorLogbooks(String, UserPrincipal): ResponseEntity<List<LogbookEntry>>
+}
+class LogbookEntry << Entity >> {
+  - remarks: String
+  - totalHrs: double
+  - timeout: LocalDateTime
+  - visibility: RecordVisibility
+  - ojtrecord: OjtRecord
+  - activities: String
+  - status: LogbookStatus
+  - timein: LocalDateTime
+  - entryId: Integer
+  - tasks: List<Task>
+  - skills: List<Skill>
+  + setActivities(String): void
+  + getOjtrecord(): OjtRecord
+  + getTasks(): List<Task>
+  + setTotalHrs(double): void
+  + setSkills(List<Skill>): void
+  + equals(Object): boolean
+  + setTimeout(LocalDateTime): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setTasks(List<Task>): void
+  + getEntryId(): Integer
+  + setVisibility(RecordVisibility): void
+  + setRemarks(String): void
+  + getTimein(): LocalDateTime
+  + getTimeout(): LocalDateTime
+  + setStatus(LogbookStatus): void
+  + getStatus(): LogbookStatus
+  + getTotalHrs(): double
+  + getActivities(): String
+  + getRemarks(): String
+  + getVisibility(): RecordVisibility
+  + getSkills(): List<Skill>
+  + setEntryId(Integer): void
+  + setTimein(LocalDateTime): void
+  + setOjtrecord(OjtRecord): void
+  - getHoursRendered(LocalDateTime, LocalDateTime): double
+  + toString(): String
+}
+interface LogbookEntryRepo << Repository>> {
+  + findByOjtrecord_Supervisor_User_Email(String): List<LogbookEntry>
+  + findByOjtrecord_RecordNo(String): List<LogbookEntry>
+  + findByOjtrecord_Student_User_Email(String): List<LogbookEntry>
+  + findByTimein(LocalDateTime): LogbookEntry
+}
+class LogbookService << Service >> {
+  - ojtRecordRepo: OjtRecordRepo
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - skillTrendRepo: SkillTrendRepo
+  - logbookEntryRepo: LogbookEntryRepo
+  - studentTaskRepo: StudentTaskRepo
+  - skillService: SkillService
+  - studentSkillProficiencyRepo: StudentSkillProficiencyRepo
+  - emailService: EmailService
+  - skillRepo: SkillRepo
+  - taskRepo: TaskRepo
+  - studentRepo: StudentRepo
+  + getSupervisorLogbooks(String): List<LogbookEntry>
+  + addLogbookEntry(LogbookEntryDTO, String): String
+  + getStudentLogbook(String): List<LogbookEntry>
+  - validateTimeAndCheckOverlap(LocalDateTime, LocalDateTime, ZonedDateTime, OjtRecord): String?
+  + updateLogbookEntry(LogbookEntryDTO, String): String
+  + rejectLogbookEntry(int, String, String): String
+  + approveLogbookEntry(int, String, String): String
+}
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + getRecordNo(): String
+  + setDepartment(String): void
+  + getLogbookEntries(): List<LogbookEntry>
+  + setSupervisor(Supervisor): void
+  + setOjtHours(double): void
+  + equals(Object): boolean
+  + getVisibility(): RecordVisibility
+  + setLogbookEntries(List<LogbookEntry>): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setDesignation(String): void
+  + getStatus(): OJTStatus
+  + getSupervisor(): Supervisor
+  + setStatus(OJTStatus): void
+  + getCompany(): Company
+  + getDesignation(): String
+  + getStudent(): Student
+  + setVisibility(RecordVisibility): void
+  + getDepartment(): String
+  + setRecordNo(String): void
+  + setStudent(Student): void
+  + getOjtHours(): double
+  + getRenderedHours(): double
+  + setRenderedHours(double): void
+  + setCompany(Company): void
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class UserEntity << Entity >> {
+  - uid: long
+  - accountType: Role
+  - firstname: String
+  - userStatus: AccountStatus
+  - email: String
+  - password: String
+  - lastname: String
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getAccountType(): Role
+  + getUid(): long
+  + setAccountType(Role): void
+  + getEmail(): String
+  + setUserStatus(AccountStatus): void
+  + getLastname(): String
+  + setPassword(String): void
+  + setFirstname(String): void
+  + setEmail(String): void
+  + getPassword(): String
+  + getUserStatus(): AccountStatus
+  + getFirstname(): String
+  + setUid(long): void
+  + setLastname(String): void
+  + toString(): String
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+LogbookController  -[#595959,dashed]->  LogbookEntry
+LogbookController  -[#595959,dashed]->  LogbookService
+LogbookController  -[#595959,dashed]->  UserPrincipal
+LogbookEntry       -[#595959,dashed]->  OjtRecord
+LogbookEntryRepo   -[#595959,dashed]->  LogbookEntry
+LogbookService     -[#595959,dashed]->  EmailService
+LogbookService     -[#595959,dashed]->  LogbookEntry      : "«create»"
+LogbookService     -[#595959,dashed]->  LogbookEntryRepo
+LogbookService     -[#595959,dashed]->  OjtRecord
+LogbookService     -[#595959,dashed]->  OjtRecordRepo
+LogbookService     -[#595959,dashed]->  UserEntity
+OjtRecord          -[#595959,dashed]->  LogbookEntry
+OjtRecordRepo      -[#595959,dashed]->  OjtRecord
+@enduml

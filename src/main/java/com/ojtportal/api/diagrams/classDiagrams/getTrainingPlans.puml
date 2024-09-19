@@ -1,0 +1,167 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + getRecordNo(): String
+  + setStatus(OJTStatus): void
+  + setLogbookEntries(List<LogbookEntry>): void
+  + setRenderedHours(double): void
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getSupervisor(): Supervisor
+  + setOjtHours(double): void
+  + getDesignation(): String
+  + setVisibility(RecordVisibility): void
+  + getStatus(): OJTStatus
+  + getVisibility(): RecordVisibility
+  + getStudent(): Student
+  + setSupervisor(Supervisor): void
+  + setRecordNo(String): void
+  + getCompany(): Company
+  + setStudent(Student): void
+  + getDepartment(): String
+  + getLogbookEntries(): List<LogbookEntry>
+  + setDepartment(String): void
+  + setCompany(Company): void
+  + getOjtHours(): double
+  + setDesignation(String): void
+  + getRenderedHours(): double
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class StudentTrainingPlan << Entity >> {
+  - student: Student
+  - trainingPlan: TrainingPlan
+  - id: Integer
+  - completedTasks: int
+  + equals(Object): boolean
+  + setCompletedTasks(int): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + toString(): String
+  + getId(): Integer
+  + setStudent(Student): void
+  + getStudent(): Student
+  + getTrainingPlan(): TrainingPlan
+  + getCompletedTasks(): int
+  + setId(Integer): void
+  + setTrainingPlan(TrainingPlan): void
+}
+interface StudentTrainingPlanRepo << Repository>> {
+  + findByStudentAndTrainingPlan(Student, TrainingPlan): StudentTrainingPlan
+  + findByTrainingPlan(TrainingPlan): List<StudentTrainingPlan>
+  + findByStudent(Student): List<StudentTrainingPlan>
+}
+class TrainingPlan << Entity >> {
+  - trainingplanid: Integer
+  - description: String
+  - endDate: LocalDate
+  - studentTrainingPlans: List<StudentTrainingPlan>
+  - startDate: LocalDate
+  - title: String
+  - visibility: RecordVisibility
+  - supervisor: Supervisor
+  - totalTasks: int
+  - tasks: List<Task>
+  + equals(Object): boolean
+  + setSupervisor(Supervisor): void
+  + setTitle(String): void
+  + setEndDate(LocalDate): void
+  + setStudentTrainingPlans(List<StudentTrainingPlan>): void
+  # canEqual(Object): boolean
+  + getTasks(): List<Task>
+  + hashCode(): int
+  + getSupervisor(): Supervisor
+  + getTrainingplanid(): Integer
+  + getTitle(): String
+  + getDescription(): String
+  + getStartDate(): LocalDate
+  + setTasks(List<Task>): void
+  + setTotalTasks(int): void
+  + getTotalTasks(): int
+  + getVisibility(): RecordVisibility
+  + setStartDate(LocalDate): void
+  + setVisibility(RecordVisibility): void
+  + setTrainingplanid(Integer): void
+  + setDescription(String): void
+  + getEndDate(): LocalDate
+  + getStudentTrainingPlans(): List<StudentTrainingPlan>
+  + toString(): String
+}
+class TrainingPlanController << RestController >> {
+  - trainingPlanService: TrainingPlanService
+  + getAllTrainingPlansByStudent(String, UserPrincipal): ResponseEntity<List<TrainingPlan>>
+  + addTrainingPlan(TrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+  + updateTrainingPlan(TrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+  + assignTrainingPlan(AssignTrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+}
+class TrainingPlanService << Service >> {
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - emailService: EmailService
+  - trainingPlanRepo: TrainingPlanRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - supervisorRepo: SupervisorRepo
+  - studentTaskRepo: StudentTaskRepo
+  + assignTrainingPlan(AssignTrainingPlanDTO, String): String
+  + getAllTrainingPlanBySupervisor(String): List<TrainingPlan>
+  + getTrainingPlansBySupervisor(String): List<TrainingPlan>
+  + getAllTrainingPlansByStudent(String): String
+  + getTrainingPlansByStudent(String, String, String): List<TrainingPlan>
+  + updateTrainingPlan(TrainingPlanDTO, String): String
+  + getAllTrainingPlansListByStudent(String): List<TrainingPlan>
+  - sendAssignmentEmails(List<String>, Supervisor, TrainingPlan): void
+  - sendTrainingPlanUpdateNotification(List<String>, Supervisor, TrainingPlan): void
+  + addTrainingPlan(TrainingPlanDTO, String): String
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+OjtRecordRepo            -[#595959,dashed]->  OjtRecord
+StudentTrainingPlan      -[#595959,dashed]->  TrainingPlan
+StudentTrainingPlanRepo  -[#595959,dashed]->  StudentTrainingPlan
+StudentTrainingPlanRepo  -[#595959,dashed]->  TrainingPlan
+TrainingPlan             -[#595959,dashed]->  StudentTrainingPlan
+TrainingPlanController   -[#595959,dashed]->  TrainingPlan
+TrainingPlanController   -[#595959,dashed]->  TrainingPlanService
+TrainingPlanController   -[#595959,dashed]->  UserPrincipal
+TrainingPlanService      -[#595959,dashed]->  OjtRecord
+TrainingPlanService      -[#595959,dashed]->  OjtRecordRepo
+TrainingPlanService      -[#595959,dashed]->  StudentTrainingPlan     : "«create»"
+TrainingPlanService      -[#595959,dashed]->  StudentTrainingPlanRepo
+TrainingPlanService      -[#595959,dashed]->  TrainingPlan            : "«create»"
+@enduml

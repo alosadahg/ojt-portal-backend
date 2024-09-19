@@ -1,0 +1,206 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class Company << Entity >> {
+  - companyName: String
+  - id: Integer
+  - ojtRecords: List<OjtRecord>
+  - emails: List<String>
+  - locations: List<String>
+  - contactNos: List<String>
+  - supervisors: List<Supervisor>
+  # canEqual(Object): boolean
+  + getSupervisors(): List<Supervisor>
+  + builder(): CompanyBuilder
+  + setId(Integer): void
+  + equals(Object): boolean
+  - $default$emails(): List<String>
+  + hashCode(): int
+  + getOjtRecords(): List<OjtRecord>
+  + getId(): Integer
+  + getCompanyName(): String
+  + setContactNos(List<String>): void
+  - $default$locations(): List<String>
+  + setEmails(List<String>): void
+  + setCompanyName(String): void
+  + setLocations(List<String>): void
+  + getContactNos(): List<String>
+  + getEmails(): List<String>
+  + setOjtRecords(List<OjtRecord>): void
+  + setSupervisors(List<Supervisor>): void
+  - $default$contactNos(): List<String>
+  + getLocations(): List<String>
+  + toString(): String
+}
+interface CompanyRepo << Repository>> {
+  + findByCompanyName(String): Company
+}
+class CompanyService << Service >> {
+  - ojtRecordRepo: OjtRecordRepo
+  - companyRepo: CompanyRepo
+  + addCompany(String, String, String, String): int
+  + getSupervisorsByCompany(String): List<Supervisor>
+  + addSupervisor(String, Supervisor): int
+  + getAllCompanies(String, String): List<Company>
+  + getStudentsByCompany(String): List<Student>
+  + addCompany(String): int
+}
+class Supervisor << Entity >> {
+  - company: Company
+  - ojtRecords: List<OjtRecord>
+  - userid: long
+  - position: String
+  - user: UserEntity
+  - work_address: String
+  - work_email: String
+  - work_contactNo: String
+  - trainingPlans: List<TrainingPlan>
+  + getOjtRecords(): List<OjtRecord>
+  + setUserid(long): void
+  + equals(Object): boolean
+  + getCompany(): Company
+  + setPosition(String): void
+  # canEqual(Object): boolean
+  + setTrainingPlans(List<TrainingPlan>): void
+  + hashCode(): int
+  + getUserid(): long
+  + getUser(): UserEntity
+  + setWork_address(String): void
+  + setOjtRecords(List<OjtRecord>): void
+  + getPosition(): String
+  + getWork_email(): String
+  + getTrainingPlans(): List<TrainingPlan>
+  + getWork_contactNo(): String
+  + getWork_address(): String
+  + setWork_email(String): void
+  + setWork_contactNo(String): void
+  + setCompany(Company): void
+  + setUser(UserEntity): void
+  + toString(): String
+}
+class SupervisorController << RestController >> {
+  - supervisorService: SupervisorService
+  + addSupervisor(SupervisorDTO): ResponseEntity<Integer>
+}
+class SupervisorDTO {
+  - company_email: String
+  - company_location: String
+  - company_contactNo: String
+  - company_name: String
+  - position: String
+  + getCompany_name(): String
+  + getCompany_email(): String
+  + getCompany_contactNo(): String
+  + getCompany_location(): String
+  + getPosition(): String
+  + setCompany_email(String): void
+  + setPosition(String): void
+  + setCompany_contactNo(String): void
+  + setCompany_location(String): void
+  + setCompany_name(String): void
+}
+interface SupervisorRepo << Repository>> {
+  + findByUser_Email(String): Supervisor
+}
+class SupervisorService << Service >> {
+  ~ userService: UserService
+  ~ supervisorRepo: SupervisorRepo
+  ~ companyService: CompanyService
+  ~ companyRepo: CompanyRepo
+  ~ userRepo: UserRepo
+  + registerSupervisor(UserEntity, String, String, String, String, String): int
+}
+class UserEntity << Entity >> {
+  - uid: long
+  - accountType: Role
+  - firstname: String
+  - userStatus: AccountStatus
+  - email: String
+  - password: String
+  - lastname: String
+  + getPassword(): String
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getUid(): long
+  + setLastname(String): void
+  + getEmail(): String
+  + setEmail(String): void
+  + setAccountType(Role): void
+  + setUid(long): void
+  + setPassword(String): void
+  + getLastname(): String
+  + getAccountType(): Role
+  + setFirstname(String): void
+  + getFirstname(): String
+  + setUserStatus(AccountStatus): void
+  + getUserStatus(): AccountStatus
+  + toString(): String
+}
+interface UserRepo << Repository>> {
+  + findByEmailAndPassword(String, String): UserEntity
+  + findByEmail(String): UserEntity
+  + findByAccountType(String): List<UserEntity>
+  + findByUserStatus(String): List<UserEntity>
+}
+class UserService << Service >> {
+  - verification: String
+  - emailService: EmailService
+  - principal: UserPrincipal
+  - issuer: JwtIssuer
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - studentRepo: StudentRepo
+  - trainingPlanService: TrainingPlanService
+  - taskRepo: TaskRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - userRepo: UserRepo
+  - authenticationManager: AuthenticationManager
+  - supervisorRepo: SupervisorRepo
+  - studentTaskRepo: StudentTaskRepo
+  + addUser(UserEntity): int
+  - getSupervisorInfo(String): SupervisorFullDTO
+  + getUserEntity(Long): UserEntity
+  + forgetPassword(String): int
+  + registerChair(UserEntity): int
+  + getAllUsers(): List<UserEntity>
+  + getUserInfo(Long): String
+  + restrictUser(Long): void
+  + restrictUser(String): int
+  + activateUser(Long): void
+  + getStudentFullInfo(String): StudentFullDTO
+  + activateUser(String): int
+  + registerAdmin(UserEntity): int
+  + authenticate(String, String, String, String): int
+  + login(UserEntity): String
+  + registerInstructor(UserEntity): int
+  + changePassword(Long, String, String): String
+}
+
+Company               -[#595959,dashed]->  Supervisor
+CompanyRepo           -[#595959,dashed]->  Company
+CompanyService        -[#595959,dashed]->  Company              : "«create»"
+CompanyService        -[#595959,dashed]->  CompanyRepo
+CompanyService        -[#595959,dashed]->  Supervisor
+Supervisor            -[#595959,dashed]->  Company
+Supervisor            -[#595959,dashed]->  UserEntity
+SupervisorController  -[#595959,dashed]->  SupervisorDTO
+SupervisorController  -[#595959,dashed]->  SupervisorService
+SupervisorController  -[#595959,dashed]->  UserEntity           : "«create»"
+SupervisorRepo        -[#595959,dashed]->  Supervisor
+SupervisorService     -[#595959,dashed]->  Company
+SupervisorService     -[#595959,dashed]->  CompanyRepo
+SupervisorService     -[#595959,dashed]->  CompanyService
+SupervisorService     -[#595959,dashed]->  Supervisor           : "«create»"
+SupervisorService     -[#595959,dashed]->  SupervisorRepo
+SupervisorService     -[#595959,dashed]->  UserEntity
+SupervisorService     -[#595959,dashed]->  UserRepo
+SupervisorService     -[#595959,dashed]->  UserService
+UserRepo              -[#595959,dashed]->  UserEntity
+UserService           -[#595959,dashed]->  Company
+UserService           -[#595959,dashed]->  Supervisor
+UserService           -[#595959,dashed]->  SupervisorDTO        : "«create»"
+UserService           -[#595959,dashed]->  SupervisorRepo
+UserService           -[#595959,dashed]->  UserEntity
+UserService           -[#595959,dashed]->  UserRepo
+@endumlh

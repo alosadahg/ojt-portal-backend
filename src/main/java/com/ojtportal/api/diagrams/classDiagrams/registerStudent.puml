@@ -1,0 +1,152 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class EmailService << Service >> {
+  - javaMailSender: JavaMailSender
+  - sender: String
+  + sendSimpleMail(String, String, String): String
+}
+class Student << Entity >> {
+  - degreeProgram: String
+  - skillFrequencies: List<StudentSkillProficiency>
+  - studentTasks: List<StudentTask>
+  - ojtRecord: OjtRecord
+  - studentid: String
+  - userid: long
+  - user: UserEntity
+  + getStudentid(): String
+  + getUserid(): long
+  + setOjtRecord(OjtRecord): void
+  + getDegreeProgram(): String
+  + getUser(): UserEntity
+  + setUserid(long): void
+  + getOjtRecord(): OjtRecord
+  + setUser(UserEntity): void
+  + setStudentTasks(List<StudentTask>): void
+  + setStudentid(String): void
+  + getSkillFrequencies(): List<StudentSkillProficiency>
+  + setSkillFrequencies(List<StudentSkillProficiency>): void
+  + getStudentTasks(): List<StudentTask>
+  + setDegreeProgram(String): void
+  + hashCode(): int
+  + toString(): String
+  + equals(Object): boolean
+}
+class StudentController << RestController >> {
+  - studentService: StudentService
+  + registerNewStudentUser(StudentDTO): ResponseEntity<Integer>
+  + getAllStudents(): ResponseEntity<List<Student>>
+}
+class StudentDTO {
+  - degreeProgram: String
+  - studentID: String
+  + getStudentID(): String
+  + getDegreeProgram(): String
+  + setStudentID(String): void
+  + setDegreeProgram(String): void
+}
+interface StudentRepo << Repository>> {
+  + findByUser_Email(String): Student
+  + findByStudentid(String): Student
+  + findByStudentidAndUserid(String, Long): Student
+}
+class StudentService << Service >> {
+  - emailService: EmailService
+  - unregisteredInternRepo: UnregisteredInternRepo
+  - userRepo: UserRepo
+  - userService: UserService
+  - studentRepo: StudentRepo
+  + registerUserToStudent(Long, String, String): int
+  + registerNewUserStudent(UserEntity, String, String): int
+  + getAllStudents(): List<Student>
+  + getStudentByStudentID(String): Student
+}
+interface UnregisteredInternRepo << Repository>>
+class UserEntity << Entity >> {
+  - uid: long
+  - accountType: Role
+  - firstname: String
+  - userStatus: AccountStatus
+  - email: String
+  - password: String
+  - lastname: String
+  + getUid(): long
+  + setEmail(String): void
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getUserStatus(): AccountStatus
+  + getLastname(): String
+  + setAccountType(Role): void
+  + getEmail(): String
+  + setPassword(String): void
+  + setUid(long): void
+  + getPassword(): String
+  + setUserStatus(AccountStatus): void
+  + getAccountType(): Role
+  + getFirstname(): String
+  + setFirstname(String): void
+  + setLastname(String): void
+  + toString(): String
+}
+interface UserRepo << Repository>> {
+  + findByEmailAndPassword(String, String): UserEntity
+  + findByEmail(String): UserEntity
+  + findByAccountType(String): List<UserEntity>
+  + findByUserStatus(String): List<UserEntity>
+}
+class UserService << Service >> {
+  - verification: String
+  - emailService: EmailService
+  - principal: UserPrincipal
+  - issuer: JwtIssuer
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - studentRepo: StudentRepo
+  - trainingPlanService: TrainingPlanService
+  - taskRepo: TaskRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - userRepo: UserRepo
+  - authenticationManager: AuthenticationManager
+  - supervisorRepo: SupervisorRepo
+  - studentTaskRepo: StudentTaskRepo
+  + addUser(UserEntity): int
+  - getSupervisorInfo(String): SupervisorFullDTO
+  + getUserEntity(Long): UserEntity
+  + forgetPassword(String): int
+  + registerChair(UserEntity): int
+  + getAllUsers(): List<UserEntity>
+  + getUserInfo(Long): String
+  + restrictUser(Long): void
+  + restrictUser(String): int
+  + activateUser(Long): void
+  + getStudentFullInfo(String): StudentFullDTO
+  + activateUser(String): int
+  + registerAdmin(UserEntity): int
+  + authenticate(String, String, String, String): int
+  + login(UserEntity): String
+  + registerInstructor(UserEntity): int
+  + changePassword(Long, String, String): String
+}
+
+Student                 -[#595959,dashed]->  UserEntity
+StudentController       -[#595959,dashed]->  Student
+StudentController       -[#595959,dashed]->  StudentDTO
+StudentController       -[#595959,dashed]->  StudentService
+StudentController       -[#595959,dashed]->  UserEntity             : "«create»"
+StudentRepo             -[#595959,dashed]->  Student
+StudentService          -[#595959,dashed]->  EmailService
+StudentService          -[#595959,dashed]->  Student                : "«create»"
+StudentService          -[#595959,dashed]->  StudentRepo
+StudentService          -[#595959,dashed]->  UnregisteredInternRepo
+StudentService          -[#595959,dashed]->  UserEntity
+StudentService          -[#595959,dashed]->  UserRepo
+StudentService          -[#595959,dashed]->  UserService
+UserRepo                -[#595959,dashed]->  UserEntity
+UserService             -[#595959,dashed]->  EmailService
+UserService             -[#595959,dashed]->  Student
+UserService             -[#595959,dashed]->  StudentDTO             : "«create»"
+UserService             -[#595959,dashed]->  StudentRepo
+UserService             -[#595959,dashed]->  UserEntity
+UserService             -[#595959,dashed]->  UserRepo
+@enduml

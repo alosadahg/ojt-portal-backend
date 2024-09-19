@@ -1,0 +1,144 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class StudentTrainingPlan << Entity >> {
+  - student: Student
+  - trainingPlan: TrainingPlan
+  - id: Integer
+  - completedTasks: int
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setStudent(Student): void
+  + toString(): String
+  + setTrainingPlan(TrainingPlan): void
+  + setCompletedTasks(int): void
+  + getId(): Integer
+  + getStudent(): Student
+  + getTrainingPlan(): TrainingPlan
+  + getCompletedTasks(): int
+  + setId(Integer): void
+}
+interface StudentTrainingPlanRepo << Repository>> {
+  + findByStudentAndTrainingPlan(Student, TrainingPlan): StudentTrainingPlan
+  + findByTrainingPlan(TrainingPlan): List<StudentTrainingPlan>
+  + findByStudent(Student): List<StudentTrainingPlan>
+}
+class TrainingPlan << Entity >> {
+  - trainingplanid: Integer
+  - description: String
+  - endDate: LocalDate
+  - studentTrainingPlans: List<StudentTrainingPlan>
+  - startDate: LocalDate
+  - title: String
+  - visibility: RecordVisibility
+  - supervisor: Supervisor
+  - totalTasks: int
+  - tasks: List<Task>
+  + equals(Object): boolean
+  + setDescription(String): void
+  + setTitle(String): void
+  # canEqual(Object): boolean
+  + getStudentTrainingPlans(): List<StudentTrainingPlan>
+  + hashCode(): int
+  + getSupervisor(): Supervisor
+  + setTrainingplanid(Integer): void
+  + getTotalTasks(): int
+  + setStartDate(LocalDate): void
+  + setTasks(List<Task>): void
+  + getTrainingplanid(): Integer
+  + getTitle(): String
+  + getDescription(): String
+  + getTasks(): List<Task>
+  + setSupervisor(Supervisor): void
+  + setEndDate(LocalDate): void
+  + getStartDate(): LocalDate
+  + getEndDate(): LocalDate
+  + getVisibility(): RecordVisibility
+  + setTotalTasks(int): void
+  + setStudentTrainingPlans(List<StudentTrainingPlan>): void
+  + setVisibility(RecordVisibility): void
+  + toString(): String
+}
+class TrainingPlanController << RestController >> {
+  - trainingPlanService: TrainingPlanService
+  + getAllTrainingPlansByStudent(String, UserPrincipal): ResponseEntity<List<TrainingPlan>>
+  + addTrainingPlan(TrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+  + updateTrainingPlan(TrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+  + assignTrainingPlan(AssignTrainingPlanDTO, UserPrincipal): ResponseEntity<String>
+}
+class TrainingPlanDTO {
+  - title: String
+  - startDate: LocalDate
+  - plan_id: int
+  - description: String
+  - endDate: LocalDate
+  + setStartDate(LocalDate): void
+  + setEndDate(LocalDate): void
+  + getPlan_id(): int
+  + getTitle(): String
+  + getDescription(): String
+  + getStartDate(): LocalDate
+  + getEndDate(): LocalDate
+  + setPlan_id(int): void
+  + setTitle(String): void
+  + setDescription(String): void
+}
+interface TrainingPlanRepo << Repository>> {
+  + findByTitleAndSupervisor(String, Supervisor): TrainingPlan
+  + findBySupervisor_User_Email(String): List<TrainingPlan>
+  + findByTitle(String): TrainingPlan
+  + findBySupervisor_User_EmailAndStudentTrainingPlans_Student_User_Email(String, String): List<TrainingPlan>
+  + findByStudentTrainingPlans_Student_User_Email(String): List<TrainingPlan>
+}
+class TrainingPlanService << Service >> {
+  - studentTrainingPlanRepo: StudentTrainingPlanRepo
+  - emailService: EmailService
+  - trainingPlanRepo: TrainingPlanRepo
+  - ojtRecordRepo: OjtRecordRepo
+  - supervisorRepo: SupervisorRepo
+  - studentTaskRepo: StudentTaskRepo
+  + assignTrainingPlan(AssignTrainingPlanDTO, String): String
+  + getAllTrainingPlanBySupervisor(String): List<TrainingPlan>
+  + getTrainingPlansBySupervisor(String): List<TrainingPlan>
+  + getAllTrainingPlansByStudent(String): String
+  + getTrainingPlansByStudent(String, String, String): List<TrainingPlan>
+  + updateTrainingPlan(TrainingPlanDTO, String): String
+  + getAllTrainingPlansListByStudent(String): List<TrainingPlan>
+  - sendAssignmentEmails(List<String>, Supervisor, TrainingPlan): void
+  - sendTrainingPlanUpdateNotification(List<String>, Supervisor, TrainingPlan): void
+  + addTrainingPlan(TrainingPlanDTO, String): String
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+StudentTrainingPlan      -[#595959,dashed]->  TrainingPlan
+StudentTrainingPlanRepo  -[#595959,dashed]->  StudentTrainingPlan
+StudentTrainingPlanRepo  -[#595959,dashed]->  TrainingPlan
+TrainingPlan             -[#595959,dashed]->  StudentTrainingPlan
+TrainingPlanController   -[#595959,dashed]->  TrainingPlan
+TrainingPlanController   -[#595959,dashed]->  TrainingPlanDTO
+TrainingPlanController   -[#595959,dashed]->  TrainingPlanService
+TrainingPlanController   -[#595959,dashed]->  UserPrincipal
+TrainingPlanRepo         -[#595959,dashed]->  TrainingPlan
+TrainingPlanService      -[#595959,dashed]->  StudentTrainingPlan     : "«create»"
+TrainingPlanService      -[#595959,dashed]->  StudentTrainingPlanRepo
+TrainingPlanService      -[#595959,dashed]->  TrainingPlan            : "«create»"
+TrainingPlanService      -[#595959,dashed]->  TrainingPlanDTO
+TrainingPlanService      -[#595959,dashed]->  TrainingPlanRepo
+@enduml

@@ -1,0 +1,236 @@
+@startuml
+!theme plain
+left to right direction
+skinparam linetype ortho
+
+class Company {
+  - companyName: String
+  - id: Integer
+  - ojtRecords: List<OjtRecord>
+  - emails: List<String>
+  - locations: List<String>
+  - contactNos: List<String>
+  - supervisors: List<Supervisor>
+  + setLocations(List<String>): void
+  - $default$contactNos(): List<String>
+  + setId(Integer): void
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getId(): Integer
+  + getCompanyName(): String
+  + builder(): CompanyBuilder
+  + getContactNos(): List<String>
+  + setEmails(List<String>): void
+  + setSupervisors(List<Supervisor>): void
+  + setCompanyName(String): void
+  - $default$locations(): List<String>
+  + setContactNos(List<String>): void
+  + getEmails(): List<String>
+  + setOjtRecords(List<OjtRecord>): void
+  - $default$emails(): List<String>
+  + getLocations(): List<String>
+  + getSupervisors(): List<Supervisor>
+  + getOjtRecords(): List<OjtRecord>
+  + toString(): String
+}
+interface CompanyRepo << interface >> {
+  + findByCompanyName(String): Company
+}
+class EmailService {
+  - javaMailSender: JavaMailSender
+  - sender: String
+  + sendSimpleMail(String, String, String): String
+}
+class OJTRecordController {
+  - ojtRecordService: OjtRecordService
+  + getAllOjtRecords(String, UserPrincipal): ResponseEntity<List<OjtRecord>>
+  + addIntern(OJTRecordDTO, UserPrincipal): ResponseEntity<String>
+  + joinTeam(String, UserPrincipal): ResponseEntity<Integer>
+}
+class OJTRecordDTO {
+  - designation: String
+  - ojtHours: double
+  - department: String
+  - studentEmail: String
+  + setDesignation(String): void
+  + getDesignation(): String
+  + getDepartment(): String
+  + getOjtHours(): double
+  + getStudentEmail(): String
+  + setDepartment(String): void
+  + setOjtHours(double): void
+  + setStudentEmail(String): void
+}
+class OjtRecord {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + equals(Object): boolean
+  + setCompany(Company): void
+  # canEqual(Object): boolean
+  + getSupervisor(): Supervisor
+  + setVisibility(RecordVisibility): void
+  + setLogbookEntries(List<LogbookEntry>): void
+  + getStatus(): OJTStatus
+  + hashCode(): int
+  + getRecordNo(): String
+  + setDesignation(String): void
+  + setRenderedHours(double): void
+  + setRecordNo(String): void
+  + setStudent(Student): void
+  + getVisibility(): RecordVisibility
+  + getCompany(): Company
+  + getDesignation(): String
+  + setDepartment(String): void
+  + setStatus(OJTStatus): void
+  + getDepartment(): String
+  + getLogbookEntries(): List<LogbookEntry>
+  + getStudent(): Student
+  + setOjtHours(double): void
+  + setSupervisor(Supervisor): void
+  + getOjtHours(): double
+  + getRenderedHours(): double
+  + toString(): String
+}
+interface OjtRecordRepo << interface >> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class OjtRecordService {
+  - ojtRecordRepo: OjtRecordRepo
+  - unregisteredInternRepo: UnregisteredInternRepo
+  - companyRepo: CompanyRepo
+  - userRepo: UserRepo
+  - evaluationRepo: EvaluationRepo
+  - studentRepo: StudentRepo
+  - supervisorRepo: SupervisorRepo
+  - emailService: EmailService
+  + addOjtRecord(OJTRecordDTO, String): String
+  + joinTeam(String, String): int
+  + getAllOjtRecords(String, String, String): List<OjtRecord>
+}
+class Student {
+  - degreeProgram: String
+  - skillFrequencies: List<StudentSkillProficiency>
+  - studentTasks: List<StudentTask>
+  - ojtRecord: OjtRecord
+  - studentid: String
+  - userid: long
+  - user: UserEntity
+  + getSkillFrequencies(): List<StudentSkillProficiency>
+  + getUserid(): long
+  + getStudentid(): String
+  + getDegreeProgram(): String
+  + getUser(): UserEntity
+  + setStudentid(String): void
+  + setSkillFrequencies(List<StudentSkillProficiency>): void
+  + getOjtRecord(): OjtRecord
+  + getStudentTasks(): List<StudentTask>
+  + setUserid(long): void
+  + setStudentTasks(List<StudentTask>): void
+  + setDegreeProgram(String): void
+  + setOjtRecord(OjtRecord): void
+  + setUser(UserEntity): void
+  + hashCode(): int
+  + toString(): String
+  + equals(Object): boolean
+}
+interface StudentRepo << interface >> {
+  + findByUser_Email(String): Student
+  + findByStudentid(String): Student
+  + findByStudentidAndUserid(String, Long): Student
+}
+interface SupervisorRepo << interface >> {
+  + findByUser_Email(String): Supervisor
+}
+interface UnregisteredInternRepo << interface >>
+class UserEntity {
+  - uid: long
+  - accountType: Role
+  - firstname: String
+  - userStatus: AccountStatus
+  - email: String
+  - password: String
+  - lastname: String
+  + equals(Object): boolean
+  + setFirstname(String): void
+  # canEqual(Object): boolean
+  + getAccountType(): Role
+  + setPassword(String): void
+  + setUid(long): void
+  + getLastname(): String
+  + setLastname(String): void
+  + setUserStatus(AccountStatus): void
+  + hashCode(): int
+  + setEmail(String): void
+  + getUid(): long
+  + getEmail(): String
+  + getUserStatus(): AccountStatus
+  + getPassword(): String
+  + getFirstname(): String
+  + setAccountType(Role): void
+  + toString(): String
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+interface UserRepo << interface >> {
+  + findByEmailAndPassword(String, String): UserEntity
+  + findByEmail(String): UserEntity
+  + findByAccountType(String): List<UserEntity>
+  + findByUserStatus(String): List<UserEntity>
+}
+
+Company                 -[#595959,dashed]->  OjtRecord
+CompanyRepo             -[#595959,dashed]->  Company
+OJTRecordController     -[#595959,dashed]->  OJTRecordDTO
+OJTRecordController     -[#595959,dashed]->  OjtRecord
+OJTRecordController     -[#595959,dashed]->  OjtRecordService
+OJTRecordController     -[#595959,dashed]->  UserPrincipal
+OjtRecord               -[#595959,dashed]->  Company
+OjtRecord               -[#595959,dashed]->  Student
+OjtRecordRepo           -[#595959,dashed]->  OjtRecord
+OjtRecordService        -[#595959,dashed]->  Company
+OjtRecordService        -[#595959,dashed]->  CompanyRepo
+OjtRecordService        -[#595959,dashed]->  EmailService
+OjtRecordService        -[#595959,dashed]->  OJTRecordDTO
+OjtRecordService        -[#595959,dashed]->  OjtRecord              : "«create»"
+OjtRecordService        -[#595959,dashed]->  OjtRecordRepo
+OjtRecordService        -[#595959,dashed]->  Student
+OjtRecordService        -[#595959,dashed]->  StudentRepo
+OjtRecordService        -[#595959,dashed]->  SupervisorRepo
+OjtRecordService        -[#595959,dashed]->  UnregisteredInternRepo
+OjtRecordService        -[#595959,dashed]->  UserEntity
+OjtRecordService        -[#595959,dashed]->  UserRepo
+Student                 -[#595959,dashed]->  OjtRecord
+Student                 -[#595959,dashed]->  UserEntity
+StudentRepo             -[#595959,dashed]->  Student
+UserRepo                -[#595959,dashed]->  UserEntity
+@enduml

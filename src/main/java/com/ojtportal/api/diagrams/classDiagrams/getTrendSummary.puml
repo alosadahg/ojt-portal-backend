@@ -1,0 +1,49 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class OjtAnalyticsController << RestController >> {
+  - skillTrendService: SkillTrendService
+  - getSkillTrend(SkillTrendInputDTO): ResponseEntity<SkillTrendResponseDTO>
+  - getTrendSummary(): ResponseEntity<List<SkillTrend>>
+}
+class SkillTrend << Entity >> {
+  - skillId: Integer
+  - trend: String
+  - skill: Skill
+  - demandChange: double
+  - skillFrequency: int
+  - visibility: RecordVisibility
+  + equals(Object): boolean
+  + setDemandChange(double): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + getSkillId(): Integer
+  + getDemandChange(): double
+  + setVisibility(RecordVisibility): void
+  + setSkill(Skill): void
+  + getTrend(): String
+  + setSkillId(Integer): void
+  + setTrend(String): void
+  + getSkillFrequency(): int
+  + getSkill(): Skill
+  + getVisibility(): RecordVisibility
+  + setSkillFrequency(int): void
+  + toString(): String
+}
+interface SkillTrendRepo << Repository>> {
+  + findBySkill(Skill): SkillTrend
+  + findBySkill_SkillName(String): SkillTrend
+}
+class SkillTrendService << Service >> {
+  - skillTrendRepo: SkillTrendRepo
+  + getLogbookTrend(): List<SkillTrend>
+  + getGlobalSkillTrend(SkillTrendInputDTO): SkillTrendResponseDTO
+}
+
+OjtAnalyticsController  -[#595959,dashed]->  SkillTrend
+OjtAnalyticsController  -[#595959,dashed]->  SkillTrendService
+SkillTrendRepo          -[#595959,dashed]->  SkillTrend
+SkillTrendService       -[#595959,dashed]->  SkillTrend
+SkillTrendService       -[#595959,dashed]->  SkillTrendRepo
+@enduml

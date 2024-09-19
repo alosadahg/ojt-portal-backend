@@ -1,0 +1,95 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+class OJTRecordController << RestController >> {
+  - ojtRecordService: OjtRecordService
+  + getAllOjtRecords(String, UserPrincipal): ResponseEntity<List<OjtRecord>>
+  + addIntern(OJTRecordDTO, UserPrincipal): ResponseEntity<String>
+  + joinTeam(String, UserPrincipal): ResponseEntity<Integer>
+}
+class OjtRecord << Entity >> {
+  - recordNo: String
+  - student: Student
+  - designation: String
+  - status: OJTStatus
+  - logbookEntries: List<LogbookEntry>
+  - ojtHours: double
+  - company: Company
+  - visibility: RecordVisibility
+  - renderedHours: double
+  - supervisor: Supervisor
+  - department: String
+  + getDepartment(): String
+  + getVisibility(): RecordVisibility
+  + setRecordNo(String): void
+  + equals(Object): boolean
+  + setStudent(Student): void
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + setOjtHours(double): void
+  + setVisibility(RecordVisibility): void
+  + setCompany(Company): void
+  + getStudent(): Student
+  + getRecordNo(): String
+  + getDesignation(): String
+  + setRenderedHours(double): void
+  + getStatus(): OJTStatus
+  + setLogbookEntries(List<LogbookEntry>): void
+  + setDepartment(String): void
+  + setStatus(OJTStatus): void
+  + setDesignation(String): void
+  + getOjtHours(): double
+  + getCompany(): Company
+  + getSupervisor(): Supervisor
+  + setSupervisor(Supervisor): void
+  + getLogbookEntries(): List<LogbookEntry>
+  + getRenderedHours(): double
+  + toString(): String
+}
+interface OjtRecordRepo << Repository>> {
+  + findByStudent_User_Email(String): OjtRecord
+  + findBySupervisor_User_Email(String): List<OjtRecord>
+  + findBySupervisor_User_EmailAndStudent_User_Email(String, String): OjtRecord
+  + findByStudent_Studentid(String): OjtRecord
+  + findBySupervisor(Supervisor): List<OjtRecord>
+  + findByStudent_Userid(Long): OjtRecord
+  + findByCompany_CompanyName(String): List<OjtRecord>
+}
+class OjtRecordService << Service >> {
+  - ojtRecordRepo: OjtRecordRepo
+  - unregisteredInternRepo: UnregisteredInternRepo
+  - companyRepo: CompanyRepo
+  - userRepo: UserRepo
+  - evaluationRepo: EvaluationRepo
+  - studentRepo: StudentRepo
+  - supervisorRepo: SupervisorRepo
+  - emailService: EmailService
+  + addOjtRecord(OJTRecordDTO, String): String
+  + joinTeam(String, String): int
+  + getAllOjtRecords(String, String, String): List<OjtRecord>
+}
+class UserPrincipal {
+  - email: String
+  - password: String
+  - uid: long
+  - authorities: Collection<GrantedAuthority>
+  + getAuthorities(): Collection<GrantedAuthority>
+  + getUid(): long
+  + getEmail(): String
+  + builder(): UserPrincipalBuilder
+  + getPassword(): String
+  + isCredentialsNonExpired(): boolean
+  + isAccountNonExpired(): boolean
+  + isEnabled(): boolean
+  + getUsername(): String
+  + isAccountNonLocked(): boolean
+}
+
+OJTRecordController  -[#595959,dashed]->  OjtRecord
+OJTRecordController  -[#595959,dashed]->  OjtRecordService
+OJTRecordController  -[#595959,dashed]->  UserPrincipal
+OjtRecordRepo        -[#595959,dashed]->  OjtRecord
+OjtRecordService     -[#595959,dashed]->  OjtRecord           : "«create»"
+OjtRecordService     -[#595959,dashed]->  OjtRecordRepo
+@enduml
